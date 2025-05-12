@@ -39,6 +39,8 @@ public class UserService {
         // nick name 값 확인
         loginService.checkNickNameIsNotExist(dto.getNickName());
 
+        dto.validateNumberFormat();
+
         // user Entity 정보가 모두 들어왔는지도 학인
         if(dto.validateAllData())
             oldUserDetail.setRole(UserRole.USER.name());

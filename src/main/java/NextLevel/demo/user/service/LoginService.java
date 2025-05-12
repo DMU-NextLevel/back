@@ -61,6 +61,8 @@ public class LoginService {
     public UserDetailEntity register(RequestUserCreateDto dto) {
         checkEmailAndNickNameElseThrow(dto.getEmail(), dto.getNickName());
 
+        dto.validateNumberFormat();
+
         // save img get uri
         ImgEntity savedImg = null;
         try {

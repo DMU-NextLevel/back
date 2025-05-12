@@ -1,10 +1,15 @@
 package NextLevel.demo.user.dto;
 
+import NextLevel.demo.exception.CustomException;
+import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.user.entity.UserDetailEntity;
 import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.role.UserRole;
 import jakarta.validation.constraints.NotEmpty;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,6 +53,13 @@ public class RequestUserCreateDto {
         this.socialProvider = socialProvider;
         this.socialId = socialId;
         this.imgEntity = imgEntity;
+    }
+
+    public void validateNumberFormat() {
+        if(number.matches("^010-\\d{4}-\\d{4}$"))
+            number = number.replaceAll("-", "");
+        if(!number.matches("^010\\d{8}$"))
+            throw new CustomException(ErrorCode.INVALID_NUMBER_FORMAT);
     }
 
     public UserEntity toUserEntity() {

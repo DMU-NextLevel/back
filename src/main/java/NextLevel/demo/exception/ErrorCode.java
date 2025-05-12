@@ -18,6 +18,7 @@ public enum ErrorCode {
 
     // login
     LOGIN_FAILED(HttpStatus.BAD_REQUEST, "02001","Login failed"),
+    INVALID_NUMBER_FORMAT(HttpStatus.BAD_REQUEST, "02002", "전화번호의 형식이 올바르지 않습니다"),
 
     // user / my page
     CAN_NOT_CHANGE_EMAIL(HttpStatus.BAD_REQUEST, "05001", "can not change email"),
@@ -39,6 +40,9 @@ public enum ErrorCode {
 
     // option
     NOT_FOUND_OPTION(HttpStatus.BAD_REQUEST, "06001","not found option"),
+
+    // kakao message
+    NOT_FOUND_KAKAO_REFRESH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, "10001","not found kakao refresh token"),
 
     // 시발 이게 뭐지? error
     SIBAL_WHAT_IS_IT(HttpStatus.INTERNAL_SERVER_ERROR, "05001","알지 모르는 error 발생 : %s");
