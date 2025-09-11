@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notification Test Page</title>
+</head>
+<body>
+<button onclick="login()"> button </button>
+<ol id="list">
+
+</ol>
+</body>
+</html>
+<script type="text/javaScript">
+    let eventSource; // 전역에서 관리
+
+    function connect() {
+        // 기존 연결 정리
+        if (eventSource) {
+            eventSource.close();
+        }
+
+        // 새 연결
+        eventSource = new EventSource("https://localhost:8080/socket", { withCredentials: true });
+
+        eventSource.addEventListener("notification", function (event) {
+            console.log("notification:", event.data);
+            const newElement = document.createElement("li");
+            const time = JSON.parse(event.data).time;
+            newElement.textContent = "ping at " + time;
+            document.getElementById("eventList").appendChild(newElement);
+        });
+
+        eventSource.onerror = function () {
+            console.error("EventSource error. Reconnecting in 5s...");
+            eventSource.close();
+            setTimeout(connect, 5000); // 5초 후 재연결
+        };
+
+        // 강제 재연결 타이머 (30초마다)
+        setTimeout(() => {
+            console.log("Force reconnect...");
+            eventSource.close();
+            setTimeout(connect, 5000);
+        }, 1000 * 30);
+    }
+
+    // 시작
+    connect();
+
+</script>

@@ -58,6 +58,9 @@ dependencies {
 
 	// email
 	implementation("com.sun.mail:javax.mail:1.6.2")
+
+    // socket
+    // implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {

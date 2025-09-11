@@ -75,9 +75,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login/**").permitAll()
-                .requestMatchers("/public/**").permitAll()
-                .requestMatchers("/payment/**").permitAll()
+                .requestMatchers("/login/**", "/public/**", "/payment/**", "/socket/**").permitAll()
                 .requestMatchers("/api1/**").hasRole("USER")
                 .requestMatchers("/social/**").hasRole("SOCIAL")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
