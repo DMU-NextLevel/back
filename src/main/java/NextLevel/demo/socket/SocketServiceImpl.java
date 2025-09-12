@@ -8,6 +8,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -54,7 +57,6 @@ public class SocketServiceImpl implements SocketService {
             socketUserRepository.saveSocket(newSocket);
         else
             socketAnonymousRepository.saveSocket(newSocket);
-        // socket repo anonymous / user 아애 분리하기!!
 
         sendSocket(emitter, SocketType.CONNECT, new SocketDataDto(CONNECT_DATA, LocalDateTime.now()));
 
@@ -83,7 +85,16 @@ public class SocketServiceImpl implements SocketService {
     @Override
     public void sendSocketAll(SocketType type, SocketDataDto data) {
         socketUserRepository.findAll().forEach((socketUserInfo)->sendSocket(socketUserInfo.getSocket(), type, data));
-        socketAnonymousRepository.findAll().forEach((socketUserInfo)->sendSocket(socketUserInfo.getSocket(), type, data));
+
+        Collection<SocketUserInfo> anonymousSockets = socketAnonymousRepository.findAll();
+        Iterator<SocketUserInfo> iter = anonymousSockets.iterator();
+        while(iter.hasNext()){
+            try{sendSocket(iter.next().getSocket(), type, data);}
+            catch (SocketSendFailException e) {
+                iter.remove();
+            }
+        }
+
     }
 
     private void sendSocket(SseEmitter emitter, SocketType type, SocketDataDto data){
@@ -96,8 +107,10 @@ public class SocketServiceImpl implements SocketService {
 //                    SEE_RECONNECTION_SECOND * 1000).build());
             emitter.send(SseEmitter.event().name(type.name()).data(data.toString()).build());
             log.info("sse emitter send data " + data.toString());
-        } catch (IOException e) {
-            log.info("sse send fail" + data.toString());
+        } catch (Exception e) {
+            log.info("sse send fail " + data.toString());
+            emitter.complete();
+            throw new SocketSendFailException();
         }
     }
 

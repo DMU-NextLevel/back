@@ -15,11 +15,13 @@ public class SocketUserRepository implements SocketRepository {
 
     @Override
     public Optional<SocketUserInfo> findSocket(long userId) {
+        printCount();
         return Optional.of(repo.get(userId));
     }
 
     @Override
     public void saveSocket(SocketUserInfo socket) {
+        printCount();
         repo.put(socket.getUserId(), socket); // 예전 값이 있든 없든 덮어쓰기 됨
     }
 
@@ -30,6 +32,11 @@ public class SocketUserRepository implements SocketRepository {
 
     @Override
     public Collection<SocketUserInfo> findAll() {
+        printCount();
         return repo.values();
+    }
+
+    private void printCount() {
+        log.info("user socket repository size :: " + repo.size());
     }
 }

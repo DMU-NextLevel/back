@@ -16,11 +16,13 @@ public class AnonymousSocketRepository implements SocketRepository {
 
     @Override
     public Optional<SocketUserInfo> findSocket(long userId) {
+        printCount();
         return Optional.empty();
     }
 
     @Override
     public void saveSocket(SocketUserInfo socket) {
+        printCount();
         repo.add(socket);
     }
 
@@ -31,7 +33,12 @@ public class AnonymousSocketRepository implements SocketRepository {
 
     @Override
     public Collection<SocketUserInfo> findAll() {
+        printCount();
         return repo;
+    }
+
+    private void printCount() {
+        log.info("anonymous socket repository size :: " + repo.size());
     }
 
 }

@@ -37,6 +37,9 @@ public enum ErrorCode {
 
     // option
 
+    // socket
+    SOCKET_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "07001","socket send failed"),
+
     // 시발 이게 뭐지? error
     SIBAL_WHAT_IS_IT(HttpStatus.INTERNAL_SERVER_ERROR, "05001","알지 모르는 error 발생 : %s");
 
