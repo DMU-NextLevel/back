@@ -48,9 +48,9 @@ public class ProjectStoryService {
     @ImgTransaction
     public void updateProjectStory(ProjectEntity project, List<MultipartFile> imgFiles, ArrayList<Path> imgPaths) {
         List<ImgEntity> oldImgs = project.getStories().stream().map(projectImg -> projectImg.getImg()).toList();
-        log.info(Arrays.toString(oldImgs.toArray()));
+
         projectStoryRepository.deleteAllByProjectId(project.getId());
-        log.info(Arrays.toString(oldImgs.toArray()));
+
         oldImgs.forEach(img->imgService.deleteImg(img));
         saveNewProjectStory(project, imgFiles, imgPaths);
     }
