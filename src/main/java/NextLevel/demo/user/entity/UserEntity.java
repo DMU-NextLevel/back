@@ -83,4 +83,6 @@ public class UserEntity extends BasedEntity {
         this.number = StringUtil.getFormattedNumber(number, StringUtil.PHONE_NUMBER_FORMAT);
     }
     public void setAreaNumber(String areaNumber) { this.areaNumber = StringUtil.getFormattedNumber(areaNumber, StringUtil.AREA_NUMBER_FORMAT); }
+
+    public void updatePoint(long point) { this.point+= point;}
 }

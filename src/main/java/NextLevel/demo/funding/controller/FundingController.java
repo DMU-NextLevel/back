@@ -26,7 +26,7 @@ public class FundingController {
     private final FundingService fundingService;
 
     @PostMapping
-    public ResponseEntity<?> funding(@RequestBody RequestFundingDto dto) {
+    public ResponseEntity<?> funding(@RequestBody @Valid RequestFundingDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
 
         if(dto.getFree() != null)
@@ -37,7 +37,7 @@ public class FundingController {
         return ResponseEntity.ok().body(new SuccessResponse("success", null));
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public ResponseEntity<?> deleteFunding(@RequestBody RequestCancelFundingDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         if(dto.getFundingType().equals(FundingType.FREE))

@@ -5,6 +5,7 @@ import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.funding.dto.request.RequestCancelFundingDto;
 import NextLevel.demo.funding.dto.request.RequestFreeFundingDto;
 import NextLevel.demo.funding.dto.request.RequestOptionFundingDto;
+import NextLevel.demo.funding.entity.CouponEntity;
 import NextLevel.demo.funding.entity.FreeFundingEntity;
 import NextLevel.demo.option.OptionEntity;
 import NextLevel.demo.funding.entity.OptionFundingEntity;
@@ -32,6 +33,9 @@ public class FundingService {
     private final OptionFundingRepository optionFundingRepository;
     private final FreeFundingRepository freeFundingRepository;
 
+    private final CouponService couponService;
+
+    @Transactional
     public void cancelFreeFunding(RequestCancelFundingDto dto) {
         UserEntity user = userValidateService.getUserInfo(dto.getUserId());
         FreeFundingEntity funding = freeFundingRepository.findById(dto.getId()).orElseThrow(
@@ -42,14 +46,23 @@ public class FundingService {
         freeFundingRepository.deleteById(dto.getId());
     }
 
+    @Transactional
     public void cancelOptionFunding(RequestCancelFundingDto dto) {
         UserEntity user = userValidateService.getUserInfo(dto.getUserId());
         OptionFundingEntity funding = optionFundingRepository.findById(dto.getId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "optionFunding");}
         );
+        long price = funding.getCount() * funding.getOption().getPrice();
+
         if(!user.getId().equals(funding.getUser().getId()))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
+
+        if(funding.getCoupon() != null){
+            price = couponService.rollBackUseCoupon(funding.getCoupon(), price);
+        }
+
         optionFundingRepository.deleteById(dto.getId());
+        user.updatePoint(+price);
     }
 
     @Transactional
@@ -57,13 +70,18 @@ public class FundingService {
         UserEntity user = userValidateService.getUserInfo(dto.getUserId());
         OptionEntity option = optionValidateService.getOption(dto.getOptionId());
 
+        OptionFundingEntity entity = dto.toEntity(user, option);
+
         // validate price <> option.price * count
         long totalPrice = option.getPrice() * dto.getCount();
+        if(dto.getCouponId() != null)
+            totalPrice = couponService.useCoupon(user.getId(), dto.getCouponId(), entity, totalPrice);
 
         if(totalPrice > user.getPoint())
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(totalPrice));
 
-        optionFundingRepository.save(dto.toEntity(user, option));
+        optionFundingRepository.save(entity);
+        user.updatePoint(-totalPrice);
     }
 
     @Transactional
@@ -75,6 +93,7 @@ public class FundingService {
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(dto.getFreePrice()));
 
         freeFundingRepository.save(dto.toEntity(user, project));
+        user.updatePoint(-dto.getFreePrice());
     }
 
 }
