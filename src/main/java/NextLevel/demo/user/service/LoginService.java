@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -63,7 +64,7 @@ public class LoginService {
     // user UserController : post register
     @ImgTransaction
     @Transactional
-    public UserDetailEntity register(RequestUserCreateDto dto, ArrayList<Path> imgPaths) {
+    public UserDetailEntity register(@Valid RequestUserCreateDto dto, ArrayList<Path> imgPaths) {
         userValidateService.checkEmailAndNickNameElseThrow(dto.getEmail(), dto.getNickName());
 
         // save img get uri

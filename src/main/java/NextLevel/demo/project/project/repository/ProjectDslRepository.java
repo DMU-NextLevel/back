@@ -15,6 +15,7 @@ import com.querydsl.jpa.JPAExpressions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static NextLevel.demo.project.tag.entity.QProjectTagEntity.projectTagEntity;
@@ -46,7 +47,7 @@ public class ProjectDslRepository {
     }
 
     private BooleanExpression whereTag(QProjectEntity projectEntity, List<Long> tagIds){
-        if(tagIds != null || !tagIds.isEmpty()) {
+        if(tagIds != null && !tagIds.isEmpty() && tagIds.get(0) != null) {
             return JPAExpressions
                     .select(projectTagEntity.id)
                     .from(projectTagEntity)
