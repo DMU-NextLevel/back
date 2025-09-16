@@ -111,7 +111,8 @@ email:
 ---
 spring:
   config:
-    on-profile: prod
+    activate:
+      on-profile: prod
   datasource:
     hikari:
       maximum-pool-size: 10
