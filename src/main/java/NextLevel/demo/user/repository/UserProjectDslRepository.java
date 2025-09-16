@@ -1,5 +1,7 @@
 package NextLevel.demo.user.repository;
 
+import NextLevel.demo.exception.CustomException;
+import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.funding.repository.FundingDslRepository;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.QProjectEntity;
@@ -49,6 +51,8 @@ public class UserProjectDslRepository {
 //                        projectViewEntity.createAt.desc() // 이건 되면 진짜
 //                );
                 break;
+            default:
+                throw new CustomException(ErrorCode.NOT_FOUND, "type");
         }
         return builder;
     }

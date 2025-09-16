@@ -18,15 +18,19 @@ import org.springframework.web.multipart.MultipartFile;
 public class RequestUserCreateDto {
     private Long id;
 
+    @NotEmpty
     private String name;
+    @NotEmpty
     private String nickName;
     @NotEmpty
     private String email;
+    @NotEmpty
     private String key;
     private String address;
     private String number;
     private String areaNumber;
 
+    @NotEmpty
     private String password;
     private String socialProvider;
     private String socialId;

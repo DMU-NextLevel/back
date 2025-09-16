@@ -26,6 +26,8 @@ public class SaveProjectNoticeRequestDto {
     private String content;
     private MultipartFile img;
 
+    private Long userId;
+
     public ProjectNoticeEntity toEntity(ImgEntity imgEntity, ProjectEntity projectEntity ) {
         return ProjectNoticeEntity.builder()
             .id(noticeId)

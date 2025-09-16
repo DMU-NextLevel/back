@@ -28,11 +28,20 @@ public class OptionService {
 
     @Transactional
     public void update(SaveOptionRequestDto dto){
-        projectValidateService.validateAuthor(dto.getProjectId(), dto.getUserId());
         OptionEntity option = optionRepository.findById(dto.getOptionId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "option");}
         );
+        projectValidateService.validateAuthor(option.getProject().getId(), dto.getUserId());
         option.update(dto);
+    }
+
+    @Transactional
+    public void delete(Long optionId, Long userId){
+        OptionEntity option = optionRepository.findById(optionId).orElseThrow(
+                ()->{return new CustomException(ErrorCode.NOT_FOUND, "option");}
+        );
+        projectValidateService.validateAuthor(option.getProject().getId(), userId);
+        optionRepository.deleteById(option.getId());
     }
 
     public List<ResponseOptionDto> getAllOptions(Long projectId) {

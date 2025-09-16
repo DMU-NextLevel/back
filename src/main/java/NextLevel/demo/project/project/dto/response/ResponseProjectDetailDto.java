@@ -20,9 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 @Builder
 @AllArgsConstructor
 public class ResponseProjectDetailDto {
-    @Value("${page_count}")
-    private Long PAGE_COUNT;
-
     private Long id;
     private String title;
     private String content;
@@ -42,25 +39,28 @@ public class ResponseProjectDetailDto {
     private Double completionRate;
 
     private int likeCount;
-    private int fundingCount;
+    private long fundingCount;
     private Long userCount;
 
-    public static ResponseProjectDetailDto of(ProjectEntity entity, Long fundingPrice, Long userId) {
+    public static ResponseProjectDetailDto of(ProjectEntity entity, Long fundingPrice, Long fundingCount, Long userId) {
         ResponseProjectDetailDto dto = new ResponseProjectDetailDto();
         dto.setId(entity.getId());
         dto.setTitle(entity.getTitle());
         dto.setContent(entity.getContent());
         dto.setTitleImg(new ImgDto(entity.getTitleImg()));
+        dto.setCreatedAt(entity.getCreatedAt());
         dto.setExpiredAt(entity.getExpired());
         dto.setAuthorNickName(entity.getUser().getNickName());
         dto.setGoal(entity.getGoal());
         dto.setSum(fundingPrice);
         dto.setCompletionRate(FundingUtil.getCompletionRate(dto.sum, dto.goal));
         dto.setLikeCount(entity.getLikes().size());
-        dto.setFundingCount(entity.getFreeFundings().size());
         dto.setIsAuthor(entity.getUser().getId() == userId);
         dto.setIsExpired( LocalDateTime.now().isBefore(entity.getExpired()) );
-        dto.userCount = (long) entity.getFreeFundings().size();
+        dto.setFundingCount(fundingCount); // 펀딩의 총 갯수
+
+        dto.setUserCount(null); // 조회한 조회 수, 아직 추가 예정
+
         return dto;
     }
 

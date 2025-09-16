@@ -36,6 +36,7 @@ public class ImgServiceImpl implements ImgService {
 
     // @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ImgEntity saveImg(MultipartFile imgFile, ArrayList<Path> imgPaths) {
+        if(imgFile == null || imgFile.isEmpty()) return null;
         try {
             byte[] bytes = imgFile.getBytes();
             String fileName = imgFile.getOriginalFilename();

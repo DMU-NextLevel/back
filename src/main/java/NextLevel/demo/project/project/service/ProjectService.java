@@ -57,10 +57,9 @@ public class ProjectService {
         UserEntity user = userValidateService.getUserInfo(dto.getUserId());
         validateUser(user);
 
-        ImgEntity img = null;
-        try{
-            img = imgService.saveImg(dto.getTitleImg(), imgPaths);
-        }catch (CustomException e){;}
+        if(dto.getTitleImg() == null || dto.getTitleImg().isEmpty())
+            throw new CustomException(ErrorCode.INPUT_REQUIRED_PARAMETER);
+        ImgEntity img = imgService.saveImg(dto.getTitleImg(), imgPaths);
 
         ProjectEntity newProject = projectRepository.save(dto.toProjectEntity(user, img));
 
@@ -130,11 +129,13 @@ public class ProjectService {
 
         projectViewService.save(project, userId);
         Long fundingPrice = fundingValidateService.getTotalFundingPrice(project.getId());
+        Long fundingCount = fundingValidateService.getTotalFundingCount(project.getId());
 
-        return ResponseProjectDetailDto.of(project, fundingPrice, userId);
+        return ResponseProjectDetailDto.of(project, fundingPrice, fundingCount, userId);
     }
 
     // notice and community and story
+    // 추가 수정 필요!!! 정렬 어디다 팔아 먹음? 다시 만들것!
     @Transactional
     public ResponseProjectAllDto getProjectCommunityAndNoticeAndStoryDto(Long projectId) {
         ProjectEntity project = projectRepository.findProjectWithNoticesAndCommunityAndStory(projectId).orElseThrow(

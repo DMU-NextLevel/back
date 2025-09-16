@@ -41,7 +41,7 @@ public class ResponseNoticeDto {
         int index = 0;
 
         while (matcher.find() && index < imgs.size()) {
-            String replacement = "src=\"https://api.nextlevel.r-e.kr/img/" + imgs.get(index++) + "\"";
+            String replacement = "src='https://api.nextlevel.r-e.kr/img/" + imgs.get(index++) + "'";
             matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(result);

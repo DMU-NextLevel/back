@@ -1,6 +1,7 @@
 package NextLevel.demo.project.select;
 
 import NextLevel.demo.funding.repository.FundingDslRepository;
+import NextLevel.demo.img.entity.QImgEntity;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDetailDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.ProjectEntity;
@@ -35,6 +36,7 @@ public class SelectProjectListDslRepository {
     private QProjectTagEntity projectTagEntity = QProjectTagEntity.projectTagEntity;
     private QLikeEntity likeEntity = QLikeEntity.likeEntity;
     private QProjectViewEntity projectViewEntity = QProjectViewEntity.projectViewEntity;
+    private QImgEntity imgEntity = QImgEntity.imgEntity;
 
     public Builder builder() { return new Builder(); }
 
@@ -105,6 +107,7 @@ public class SelectProjectListDslRepository {
                         projectViewEntity.createAt // select distinct 용 컬럼
                 ))
                 .from(projectEntity)
+                // .leftJoin(imgEntity).on(projectEntity.titleImg.id.eq(imgEntity.id)).fetchJoin()
                 // .leftJoin(projectTagEntity).on(projectEntity.id.eq(projectTagEntity.project.id))
                 .leftJoin(likeEntity).on(projectEntity.id.eq(likeEntity.project.id))
                 .leftJoin(projectViewEntity).on(latestProjectViewOn(projectEntity, projectViewEntity, userId))
@@ -120,6 +123,9 @@ public class SelectProjectListDslRepository {
             QProjectViewEntity projectView, Long userId
     ) {
         QProjectViewEntity subView = new QProjectViewEntity("subView");
+
+        if(userId == null)
+            return Expressions.FALSE;
 
         return projectView.id.eq(
                 JPAExpressions

@@ -21,4 +21,11 @@ public class FundingValidateService {
                 + (freeFundingPrice != null ? freeFundingPrice : 0);
     }
 
+    public Long getTotalFundingCount(Long projectId) {
+        Long optionFundingPrice = optionFundingRepository.getTotalFundingCount(projectId);
+        Long freeFundingPrice = freeFundingRepository.getFundingCount(projectId);
+        return (optionFundingPrice != null ? optionFundingPrice : 0)
+                + (freeFundingPrice != null ? freeFundingPrice : 0);
+    }
+
 }

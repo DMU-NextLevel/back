@@ -34,7 +34,7 @@ public class ProjectController {
 
     // 추가
     @PostMapping("/api1/project")
-    public ResponseEntity<?> createNewProject(@ModelAttribute CreateProjectDto dto) {
+    public ResponseEntity<?> createNewProject(@ModelAttribute @Valid CreateProjectDto dto) {
         Long userId = JWTUtil.getUserIdFromSecurityContext();
         dto.setUserId(userId);
 

@@ -10,4 +10,7 @@ public interface FreeFundingRepository extends JpaRepository<FreeFundingEntity, 
     @Query("select sum(f.price) from FreeFundingEntity f where f.project.id = :projectId")
     Long getTotalPriceByProject(@Param("projectId") Long projectId);
 
+    @Query("select count(ff) from FreeFundingEntity ff where ff.project.id = :projectId")
+    Long getFundingCount(@Param("projectId") Long projectId);
+
 }

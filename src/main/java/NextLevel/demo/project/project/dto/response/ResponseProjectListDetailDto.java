@@ -31,8 +31,7 @@ public class ResponseProjectListDetailDto {
     private Long likeCount;
 
     private List<String> tags;
-
-    private Long totalCount;
+    
     private Long userCount;
     private Long viewCount;
 
