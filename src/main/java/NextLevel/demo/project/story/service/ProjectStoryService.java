@@ -58,6 +58,9 @@ public class ProjectStoryService {
     @ImgTransaction
     @Transactional
     public void updateProjectStory(Long projectId, Long userId, List<MultipartFile> imgFiles, ArrayList<Path> imgPaths){
+        if(imgFiles == null || imgFiles.isEmpty())
+            return;
+
         ProjectEntity oldProject = projectRepository.findByIdWithAll(projectId).orElseThrow(
                 ()->new CustomException(ErrorCode.NOT_FOUND, "project")
         );

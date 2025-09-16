@@ -135,6 +135,7 @@ public class ProjectService {
     }
 
     // notice and community and story
+    // 추가 수정 필요!!! 정렬 어디다 팔아 먹음? 다시 만들것!
     @Transactional
     public ResponseProjectAllDto getProjectCommunityAndNoticeAndStoryDto(Long projectId) {
         ProjectEntity project = projectRepository.findProjectWithNoticesAndCommunityAndStory(projectId).orElseThrow(

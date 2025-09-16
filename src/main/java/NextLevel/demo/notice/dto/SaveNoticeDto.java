@@ -5,6 +5,8 @@ import NextLevel.demo.notice.entity.NoticeImgEntity;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +20,7 @@ public class SaveNoticeDto {
 
     private Long id;
 
+    @NotNull
     private String title;
     private String content;
 

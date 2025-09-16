@@ -15,7 +15,8 @@ public class ResponseProjectCommunityDto {
     public static ResponseProjectCommunityDto of(ProjectCommunityAskEntity askEntity) {
         ResponseProjectCommunityDto dto = new ResponseProjectCommunityDto();
         dto.ask = ResponseProjectCommunityAskDto.of(askEntity);
-        dto.answer = ResponseProjectCommunityAnswerDto.of(askEntity.getAnswer());
+        if(askEntity.getAnswer() != null)
+            dto.answer = ResponseProjectCommunityAnswerDto.of(askEntity.getAnswer());
         return dto;
     }
 }

@@ -40,7 +40,7 @@ public class ProjectCommunityAskService {
     public void update(SaveCommunityDto dto) {
         Long askId = dto.getId();
         ProjectCommunityAskEntity ask = projectCommunityAskRepository.findById(askId).orElseThrow(
-                ()->{return new CustomException(ErrorCode.NOT_FOUND, "ask");}
+                ()->{return new CustomException(ErrorCode.NOT_FOUND, "community");}
         );
 
         if(ask.getUser().getId() != dto.getUserId())
@@ -59,9 +59,10 @@ public class ProjectCommunityAskService {
     @Transactional
     public void delete(Long askId, Long userId) {
         ProjectCommunityAskEntity ask = projectCommunityAskRepository.findById(askId).orElseThrow(
-                ()->{return new CustomException(ErrorCode.NOT_FOUND, "ask");}
+                ()->{return new CustomException(ErrorCode.NOT_FOUND, "community");}
         );
-        if(ask.getUser().getId() != userId)
+
+        if(! (ask.getUser().getId() == userId) || (ask.getProject().getId() == userId) ) // project validate service 를 통해야 하나?
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         projectCommunityAskRepository.deleteById(askId);
     }

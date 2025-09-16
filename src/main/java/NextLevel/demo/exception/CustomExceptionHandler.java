@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class CustomExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<?> handleCustomException(CustomException e) {
+        e.printStackTrace();
         Map<String, Object> map = new HashMap<>();
         map.put("code", e.errorCode.CustomErrorCode);
         map.put("message", e.getMessage());

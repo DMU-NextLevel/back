@@ -49,7 +49,6 @@ public class UserEntity extends BasedEntity {
     private String areaNumber;
 
     @Column(length=5, columnDefinition = "char(6)")
-    @ColumnDefault("'SOCIAL'")
     private String role = UserRole.SOCIAL.name();
 
     @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE, optional = true)

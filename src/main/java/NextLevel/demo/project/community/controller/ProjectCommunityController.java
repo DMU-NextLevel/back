@@ -4,6 +4,7 @@ import NextLevel.demo.common.SuccessResponse;
 import NextLevel.demo.project.community.dto.request.SaveCommunityDto;
 import NextLevel.demo.project.community.service.ProjectCommunityAskService;
 import NextLevel.demo.util.jwt.JWTUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class ProjectCommunityController {
 
     // 생성만
     @PostMapping("/api1/project/{projectId}/community")
-    public ResponseEntity<?> saveProjectCommunity(@PathVariable("projectId") Long projectId, @RequestBody SaveCommunityDto dto) {
+    public ResponseEntity<?> saveProjectCommunity(@PathVariable("projectId") Long projectId, @RequestBody @Valid SaveCommunityDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         dto.setId(projectId);
         communityService.create(dto);
@@ -32,7 +33,7 @@ public class ProjectCommunityController {
 
     // 수정
     @PostMapping("/api1/project/community/{communityId}")
-    public ResponseEntity<?> updateProjectCommunity(@PathVariable("communityId") Long communityId, @RequestBody SaveCommunityDto dto) {
+    public ResponseEntity<?> updateProjectCommunity(@PathVariable("communityId") Long communityId, @RequestBody @Valid SaveCommunityDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         dto.setId(communityId);
         communityService.update(dto);

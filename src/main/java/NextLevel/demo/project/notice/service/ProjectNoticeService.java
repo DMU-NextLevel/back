@@ -9,6 +9,7 @@ import NextLevel.demo.project.notice.dto.request.SaveProjectNoticeRequestDto;
 import NextLevel.demo.project.notice.entity.ProjectNoticeEntity;
 import NextLevel.demo.project.notice.repository.ProjectNoticeRepository;
 import NextLevel.demo.project.project.entity.ProjectEntity;
+import NextLevel.demo.project.project.service.ProjectValidateService;
 import jakarta.persistence.EntityManager;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,16 +25,19 @@ public class ProjectNoticeService {
 
     private final ProjectNoticeRepository projectNoticeRepository;
     private final ImgServiceImpl imgService;
-    private final EntityManager entityManager;
+    private final ProjectValidateService projectValidateService;
 
     @Transactional
     @ImgTransaction
     public void saveProjectNotice(SaveProjectNoticeRequestDto dto, ArrayList<Path> imgPaths) {
+        ProjectEntity project = projectValidateService.getProjectEntity(dto.getProjectId());
+
+        if(!project.getUser().getId().equals(dto.getUserId()))
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
 
         ImgEntity savedImg = imgService.saveImg(dto.getImg(), imgPaths);
-        ProjectEntity oldProject = entityManager.getReference(ProjectEntity.class, dto.getProjectId());
 
-        projectNoticeRepository.save(dto.toEntity(savedImg, oldProject));
+        projectNoticeRepository.save(dto.toEntity(savedImg, project));
     }
 
     @Transactional
@@ -43,13 +47,24 @@ public class ProjectNoticeService {
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "notice");}
         );
 
+        if(!notice.getProject().getUser().getId().equals(dto.getUserId()))
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
+
         notice.update(dto);
 
-        if(dto.getImg() != null || !dto.getImg().isEmpty())
-            imgService.updateImg(dto.getImg(), notice.getImg(), imgPaths);
+        if(dto.getImg() != null && !dto.getImg().isEmpty()) {
+            ImgEntity savedImg = imgService.updateImg(dto.getImg(), notice.getImg(), imgPaths);
+            if(notice.getImg() == null)
+                notice.setImg(savedImg);
+        }
     }
 
-    public void deleteProjectNotice(Long id) {
+    public void deleteProjectNotice(Long id, Long userId) {
+        ProjectNoticeEntity notice = projectNoticeRepository.findByIdWithProject(id).orElseThrow(
+                ()->{return new CustomException(ErrorCode.NOT_FOUND, "notice");}
+        );
+        if(!notice.getProject().getUser().getId().equals(userId))
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
         projectNoticeRepository.deleteById(id);
     }
 
