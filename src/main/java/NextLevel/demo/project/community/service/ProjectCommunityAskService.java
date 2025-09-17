@@ -52,7 +52,7 @@ public class ProjectCommunityAskService {
     @Transactional
     public ResponseCommunityListDto selectAll(Long projectId) {
         ProjectEntity project = projectValidateService.getProjectEntity(projectId);
-        List<ProjectCommunityAskEntity> asks = projectCommunityAskRepository.findAllByProjectId(project.getId());
+        List<ProjectCommunityAskEntity> asks = projectCommunityAskRepository.findAllWithAnswerByProjectId(project.getId());
         return new ResponseCommunityListDto(asks);
     }
 
