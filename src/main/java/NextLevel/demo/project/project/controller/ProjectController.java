@@ -3,7 +3,6 @@ package NextLevel.demo.project.project.controller;
 import NextLevel.demo.common.SuccessResponse;
 import NextLevel.demo.project.project.dto.request.CreateProjectDto;
 import NextLevel.demo.project.project.dto.request.RequestMainPageProjectListDto;
-import NextLevel.demo.project.project.dto.response.ResponseProjectAllDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectDetailDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.service.ProjectService;
@@ -97,13 +96,6 @@ public class ProjectController {
         ResponseProjectDetailDto dto = projectService.getProjectDetailById(projectId, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success" ,dto));
-    }
-
-    @GetMapping("/public/project/{projectId}/all")
-    public ResponseEntity<?> getProjectNotice(@PathVariable("projectId") Long projectId) {
-        ResponseProjectAllDto dto = projectService.getProjectCommunityAndNoticeAndStoryDto(projectId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", dto));
     }
 
 }

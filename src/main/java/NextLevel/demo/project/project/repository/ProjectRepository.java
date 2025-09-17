@@ -31,11 +31,4 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
         + "where p.id = :id")
     Optional<ProjectEntity> findProjectDetailById(@Param("id") Long id);
 
-    @Query("select p from ProjectEntity p "
-        + "left join fetch p.notices as n "
-        + "left join fetch p.communities as c "
-        + "left join fetch p.stories as story "
-        + "where p.id = :id")
-    Optional<ProjectEntity> findProjectWithNoticesAndCommunityAndStory(@Param("id") Long id);
-
 }

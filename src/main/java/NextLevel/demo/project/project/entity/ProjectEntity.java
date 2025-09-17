@@ -66,10 +66,10 @@ public class ProjectEntity extends BasedEntity {
     private List<ProjectTagEntity> tags;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
-    private Set<ProjectStoryEntity> stories;
+    private List<ProjectStoryEntity> stories;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    private Set<OptionEntity> options;
+    private List<OptionEntity> options;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     private Set<FreeFundingEntity> freeFundings;
@@ -78,15 +78,15 @@ public class ProjectEntity extends BasedEntity {
     private Set<LikeEntity> likes;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    private Set<ProjectCommunityAskEntity> communities;
+    private List<ProjectCommunityAskEntity> communities;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    private Set<ProjectNoticeEntity> notices;
+    private List<ProjectNoticeEntity> notices;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    private Set<ProjectViewEntity> views;
+    private List<ProjectViewEntity> views;
 
-    public void setStories(Set<ProjectStoryEntity> imgs) {
+    public void setStories(List<ProjectStoryEntity> imgs) {
         this.stories = imgs;
     }
     public void setTags(List<ProjectTagEntity> tags) {
@@ -96,7 +96,7 @@ public class ProjectEntity extends BasedEntity {
     @Builder
     public ProjectEntity(Long id, UserEntity user, String title, String content,
         Long goal, ImgEntity titleImg, String expired, List<ProjectTagEntity> tags,
-        Set<ProjectStoryEntity> stories) throws ParseException {
+        List<ProjectStoryEntity> stories) throws ParseException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.id = id;
         this.user = user;

@@ -1,20 +1,15 @@
 package NextLevel.demo.project.story.service;
 
-import NextLevel.demo.exception.CustomException;
-import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.img.service.ImgServiceImpl;
 import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.project.project.entity.ProjectEntity;
-import NextLevel.demo.project.project.repository.ProjectRepository;
+import NextLevel.demo.project.project.service.ProjectValidateService;
 import NextLevel.demo.project.story.entity.ProjectStoryEntity;
 import NextLevel.demo.project.story.repository.ProjectStoryRepository;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,9 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class ProjectStoryService {
 
-    private final ProjectRepository projectRepository;
     private final ProjectStoryRepository projectStoryRepository;
     private final ImgServiceImpl imgService;
+    private final ProjectValidateService projectValidateService;
 
     @ImgTransaction
     @Transactional
@@ -61,12 +56,13 @@ public class ProjectStoryService {
         if(imgFiles == null || imgFiles.isEmpty())
             return;
 
-        ProjectEntity oldProject = projectRepository.findByIdWithAll(projectId).orElseThrow(
-                ()->new CustomException(ErrorCode.NOT_FOUND, "project")
-        );
-        if(oldProject.getUser().getId() != userId)
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
+        ProjectEntity project = projectValidateService.validateAuthor(projectId, userId);
 
-        updateProjectStory(oldProject, imgFiles, imgPaths);
+        updateProjectStory(project, imgFiles, imgPaths);
+    }
+
+    public List<ProjectStoryEntity> getProjectStory(Long projectId) {
+        projectValidateService.getProjectEntity(projectId);
+        return projectStoryRepository.findAllByProjectOrderByCreatedAt(projectId);
     }
 }
