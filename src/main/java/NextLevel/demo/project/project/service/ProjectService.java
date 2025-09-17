@@ -2,6 +2,7 @@ package NextLevel.demo.project.project.service;
 
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
+import NextLevel.demo.funding.service.FundingRollbackService;
 import NextLevel.demo.funding.service.FundingValidateService;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.img.service.ImgServiceImpl;
@@ -48,6 +49,7 @@ public class ProjectService {
 
     private final FundingValidateService fundingValidateService;
     private final ProjectDslRepository projectDslRepository;
+    private final FundingRollbackService fundingRollbackService;
 
     // 추가
     @ImgTransaction
@@ -101,17 +103,21 @@ public class ProjectService {
     }
 
     // 삭제
-    public void deleteProject(Long id) {
+    @Transactional
+    @ImgTransaction
+    public void deleteProject(Long id, ArrayList<Path> imgPaths) {
         Optional<ProjectEntity> oldProjectOptional = projectRepository.findById(id);
         if(oldProjectOptional.isEmpty())
             throw new CustomException(ErrorCode.NOT_FOUND, "project");
         ProjectEntity oldProject = oldProjectOptional.get();
 
         // 펀딩 금액이 남아있다면 모두 환불 처리하기
+        fundingRollbackService.rollbackByProject(oldProject);
 
         // 다른 soft적 처리 필요한 부분 처리하기
 
         // img 처리
+        projectStoryService.updateProjectStory(oldProject, new ArrayList<>(), imgPaths);
 
         return; // 아직 구현하지 않음 + soft delete 처리 고민중 .....
     }

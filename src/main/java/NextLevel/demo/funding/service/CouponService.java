@@ -47,11 +47,4 @@ public class CouponService {
         return price>0?price:0;
     }
 
-    public long rollBackUseCoupon(CouponEntity coupon, long price) {
-        price -= coupon.getPrice();
-        coupon.rollBackUseCoupon();
-        couponRepository.save(coupon);
-        return price;
-    }
-
 }
