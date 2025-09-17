@@ -13,6 +13,8 @@ import NextLevel.demo.project.project.service.ProjectValidateService;
 import jakarta.persistence.EntityManager;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,11 @@ public class ProjectNoticeService {
     private final ProjectNoticeRepository projectNoticeRepository;
     private final ImgServiceImpl imgService;
     private final ProjectValidateService projectValidateService;
+
+    public List<ProjectNoticeEntity> getAllNotice(Long projectId){
+        ProjectEntity project = projectValidateService.getProjectEntity(projectId);
+        return projectNoticeRepository.findAllByProjectOrderByCreatedAt(project.getId());
+    }
 
     @Transactional
     @ImgTransaction
