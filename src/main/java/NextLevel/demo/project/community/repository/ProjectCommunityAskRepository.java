@@ -10,6 +10,6 @@ import java.util.List;
 public interface ProjectCommunityAskRepository extends JpaRepository<ProjectCommunityAskEntity, Long> {
 
     @Query("select ask from ProjectCommunityAskEntity ask left join fetch ask.answer where ask.project.id = :projectId")
-    List<ProjectCommunityAskEntity> findAllByProjectId(@Param("projectId") Long projectId);
+    List<ProjectCommunityAskEntity> findAllWithAnswerByProjectId(@Param("projectId") Long projectId);
 
 }

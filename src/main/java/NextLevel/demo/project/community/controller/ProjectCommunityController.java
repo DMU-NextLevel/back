@@ -2,6 +2,7 @@ package NextLevel.demo.project.community.controller;
 
 import NextLevel.demo.common.SuccessResponse;
 import NextLevel.demo.project.community.dto.request.SaveCommunityDto;
+import NextLevel.demo.project.community.service.ProjectCommunityAnswerService;
 import NextLevel.demo.project.community.service.ProjectCommunityAskService;
 import NextLevel.demo.util.jwt.JWTUtil;
 import jakarta.validation.Valid;
@@ -20,29 +21,59 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequiredArgsConstructor
 public class ProjectCommunityController {
 
-    private final ProjectCommunityAskService communityService;
+    private final ProjectCommunityAskService askService;
+    private final ProjectCommunityAnswerService answerService;
 
-    // 생성만
+    // ask 관련
+
+    // 생성
     @PostMapping("/api1/project/{projectId}/community")
-    public ResponseEntity<?> saveProjectCommunity(@PathVariable("projectId") Long projectId, @RequestBody @Valid SaveCommunityDto dto) {
+    public ResponseEntity<?> saveProjectCommunityAsk(@PathVariable("projectId") Long projectId, @RequestBody @Valid SaveCommunityDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         dto.setId(projectId);
-        communityService.create(dto);
+        askService.create(dto);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", null));
     }
 
     // 수정
     @PostMapping("/api1/project/community/{communityId}")
-    public ResponseEntity<?> updateProjectCommunity(@PathVariable("communityId") Long communityId, @RequestBody @Valid SaveCommunityDto dto) {
+    public ResponseEntity<?> updateProjectCommunityAsk(@PathVariable("communityId") Long communityId, @RequestBody @Valid SaveCommunityDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         dto.setId(communityId);
-        communityService.update(dto);
+        askService.update(dto);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", null));
     }
 
     @DeleteMapping("/api1/project/community/{communityId}")
     public ResponseEntity<?> deleteProjectCommunity(@PathVariable("communityId") Long communityId) {
-        communityService.delete(communityId,JWTUtil.getUserIdFromSecurityContext());
+        askService.delete(communityId,JWTUtil.getUserIdFromSecurityContext());
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", null));
     }
+
+    // answer 관련
+    
+    // 생성
+    @PostMapping("/api1/project/{askId}/community/answer")
+    public ResponseEntity<?> saveProjectCommunityAnswer(@PathVariable("askId") Long askId, @RequestBody @Valid SaveCommunityDto dto) {
+        dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
+        dto.setId(askId);
+        answerService.addAnswer(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", null));
+    }
+
+    // 수정
+    @PostMapping("/api1/project/community/{answerId}/answer")
+    public ResponseEntity<?> updateProjectCommunityAnswer(@PathVariable("answerId") Long answerId, @RequestBody @Valid SaveCommunityDto dto) {
+        dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
+        dto.setId(answerId);
+        answerService.updateAnswer(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", null));
+    }
+
+    @DeleteMapping("/api1/project/community/{answerId}/answer")
+    public ResponseEntity<?> deleteProjectCommunityAnswer(@PathVariable("answerId") Long answerId) {
+        answerService.deleteAnswer(answerId,JWTUtil.getUserIdFromSecurityContext());
+        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", null));
+    }
+
 }
