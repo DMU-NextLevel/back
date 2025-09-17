@@ -51,7 +51,7 @@ public class ProjectCommunityController {
     }
 
     // answer 관련
-    
+
     // 생성
     @PostMapping("/api1/project/{askId}/community/answer")
     public ResponseEntity<?> saveProjectCommunityAnswer(@PathVariable("askId") Long askId, @RequestBody @Valid SaveCommunityDto dto) {
