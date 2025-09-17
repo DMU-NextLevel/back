@@ -5,7 +5,6 @@ import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.funding.dto.request.RequestCancelFundingDto;
 import NextLevel.demo.funding.dto.request.RequestFreeFundingDto;
 import NextLevel.demo.funding.dto.request.RequestOptionFundingDto;
-import NextLevel.demo.funding.entity.CouponEntity;
 import NextLevel.demo.funding.entity.FreeFundingEntity;
 import NextLevel.demo.option.OptionEntity;
 import NextLevel.demo.funding.entity.OptionFundingEntity;
@@ -33,6 +32,8 @@ public class FundingService {
     private final OptionFundingRepository optionFundingRepository;
     private final FreeFundingRepository freeFundingRepository;
 
+    private final FundingRollbackService fundingRollbackService;
+
     private final CouponService couponService;
 
     @Transactional
@@ -43,7 +44,8 @@ public class FundingService {
         );
         if(!user.getId().equals(funding.getUser().getId()))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
-        freeFundingRepository.deleteById(dto.getId());
+
+        fundingRollbackService.rollbackFreeFunding(user, funding);
     }
 
     @Transactional
@@ -52,17 +54,11 @@ public class FundingService {
         OptionFundingEntity funding = optionFundingRepository.findById(dto.getId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "optionFunding");}
         );
-        long price = funding.getCount() * funding.getOption().getPrice();
 
         if(!user.getId().equals(funding.getUser().getId()))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
 
-        if(funding.getCoupon() != null){
-            price = couponService.rollBackUseCoupon(funding.getCoupon(), price);
-        }
-
-        optionFundingRepository.deleteById(dto.getId());
-        user.updatePoint(+price);
+        fundingRollbackService.rollbackOptionFunding(user, funding);
     }
 
     @Transactional

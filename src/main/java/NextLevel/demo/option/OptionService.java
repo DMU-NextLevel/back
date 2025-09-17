@@ -2,6 +2,7 @@ package NextLevel.demo.option;
 
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
+import NextLevel.demo.funding.service.FundingRollbackService;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class OptionService {
 
     private final OptionRepository optionRepository;
     private final ProjectValidateService projectValidateService;
+    private final FundingRollbackService fundingRollbackService;
 
     public void add(SaveOptionRequestDto dto){
         ProjectEntity project = projectValidateService.validateAuthor(dto.getProjectId(), dto.getUserId());
@@ -32,6 +34,7 @@ public class OptionService {
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "option");}
         );
         projectValidateService.validateAuthor(option.getProject().getId(), dto.getUserId());
+        fundingRollbackService.rollbackByOption(option);
         option.update(dto);
     }
 
@@ -41,6 +44,7 @@ public class OptionService {
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "option");}
         );
         projectValidateService.validateAuthor(option.getProject().getId(), userId);
+        fundingRollbackService.rollbackByOption(option);
         optionRepository.deleteById(option.getId());
     }
 

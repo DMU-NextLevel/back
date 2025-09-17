@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface OptionFundingRepository extends JpaRepository<OptionFundingEntity, Long> {
 
@@ -20,4 +22,12 @@ public interface OptionFundingRepository extends JpaRepository<OptionFundingEnti
             "where of.option.project.id = :projectId ")
     Long getTotalFundingCount(@Param("projectId") Long projectId);
 
+    @Query("select of from OptionFundingEntity of left join fetch of.user where of.option.id = :optionId")
+    List<OptionFundingEntity> findAllWithUserByOption(@Param("optionId") Long optionId);
+
+    @Query("select of from OptionFundingEntity of left join fetch of.user where of.option.project.id = :projectId")
+    List<OptionFundingEntity> findAllWithUserByProject(@Param("projectId") Long projectId);
+
+    @Query("select of from OptionFundingEntity of where of.user.id = :userId")
+    List<OptionFundingEntity> findAllByUser(@Param("userId") Long userId);
 }
