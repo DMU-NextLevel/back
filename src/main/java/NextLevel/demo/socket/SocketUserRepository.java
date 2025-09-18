@@ -16,7 +16,7 @@ public class SocketUserRepository implements SocketRepository {
     @Override
     public Optional<SocketUserInfo> findSocket(long userId) {
         printCount();
-        return Optional.of(repo.get(userId));
+        return Optional.ofNullable(repo.get(userId));
     }
 
     @Override
