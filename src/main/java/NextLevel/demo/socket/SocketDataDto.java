@@ -21,9 +21,7 @@ public class SocketDataDto {
 
     @Override
     public String toString() {
-        return "{" +
-                "'text':'" + text + '\'' +
-                ", 'createdAt':'" + createdAt + '\'' +
-                '}';
+        // JSON.parse('{"test": "test"}');
+        return "'{\"text\": \""+text+"\", \"createdAt\": \""+createdAt+"\"}'";
     }
 }
