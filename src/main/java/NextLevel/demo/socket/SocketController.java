@@ -28,13 +28,13 @@ public class SocketController {
 
     @GetMapping("/test/{id}")
     public ResponseEntity testSocket(@PathVariable("id") Long id) {
-        socketService.sendSocket(id, SocketType.CONNECT, new SocketDataDto("data", LocalDateTime.now()));
+        socketService.sendSocket(id, SocketType.NOTIFICATION, new SocketDataDto("새로운 프로젝트가 생성되었어요", LocalDateTime.now()));
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/test/all")
     public ResponseEntity testSocketAll() {
-        socketService.sendSocketAll(SocketType.CONNECT, new SocketDataDto("data", LocalDateTime.now()));
+        socketService.sendSocketAll(SocketType.NOTIFICATION, new SocketDataDto("새로운 프로젝트가 생성되었어요", LocalDateTime.now()));
         return ResponseEntity.ok().build();
     }
 

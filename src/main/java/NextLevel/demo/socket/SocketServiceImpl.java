@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -98,7 +96,7 @@ public class SocketServiceImpl implements SocketService {
     }
 
     private void sendSocket(SseEmitter emitter, SocketType type, SocketDataDto data){
-        if(data == null || data.getText() == null){
+        if(data == null || data.getData() == null){
             log.info("data is null " + data.toString());
             return;
         }
