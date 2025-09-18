@@ -23,7 +23,7 @@ public class SocketDataDto {
     public String toString() {
         return "{" +
                 "'text':'" + text + '\'' +
-                ", 'createdAt'='" + createdAt + '\'' +
+                ", 'createdAt':'" + createdAt + '\'' +
                 '}';
     }
 }
