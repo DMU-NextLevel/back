@@ -3,6 +3,7 @@ package NextLevel.demo.socket;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -16,5 +17,13 @@ public class SocketDataDto {
     public SocketDataDto(String text, LocalDateTime createdAt) {
         this.text = text;
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "'text':'" + text + '\'' +
+                ", 'createdAt'='" + createdAt + '\'' +
+                '}';
     }
 }
