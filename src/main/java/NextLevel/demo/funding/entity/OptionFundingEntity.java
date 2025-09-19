@@ -36,7 +36,7 @@ public class OptionFundingEntity extends BasedEntity {
     @Column
     private long count;
 
-    public void updateCount(int count) {
+    public void updateCount(long count) {
         this.count += count;
     }
 

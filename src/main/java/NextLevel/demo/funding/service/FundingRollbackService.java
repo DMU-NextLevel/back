@@ -26,7 +26,7 @@ public class FundingRollbackService {
         price -= coupon.getPrice();
         coupon.rollBackUseCoupon();
         couponRepository.save(coupon); // transaction내부에서는 필요 없음? (transaction에 영속성 밖이라 적용이 안될려나?)
-        return price;
+        return price>0?price:0;
     }
 
     public void rollbackOptionFunding(UserEntity user, OptionFundingEntity optionFunding) {

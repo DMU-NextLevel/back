@@ -29,10 +29,10 @@ public class FundingController {
     public ResponseEntity<?> funding(@RequestBody @Valid RequestFundingDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
 
-        if(dto.getFree() != null)
-            fundingService.freeFunding(dto.getFree());
         if(dto.getOption() != null)
             fundingService.optionFunding(dto.getOption());
+        if(dto.getFree() != null)
+            fundingService.freeFunding(dto.getFree());
 
         return ResponseEntity.ok().body(new SuccessResponse("success", null));
     }
