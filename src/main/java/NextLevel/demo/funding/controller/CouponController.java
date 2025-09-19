@@ -5,6 +5,7 @@ import NextLevel.demo.funding.dto.request.RequestAddCouponDto;
 import NextLevel.demo.funding.dto.response.ResponseCouponDto;
 import NextLevel.demo.funding.service.CouponService;
 import NextLevel.demo.util.jwt.JWTUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,7 +22,7 @@ public class CouponController {
     private final CouponService couponService;
 
     @PostMapping("/admin/coupon/add")
-    public ResponseEntity addCoupon(@RequestBody RequestAddCouponDto dto) {
+    public ResponseEntity addCoupon(@RequestBody @Valid RequestAddCouponDto dto) {
         if(dto.getUserId()==null)
             dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         couponService.addCoupon(dto);

@@ -40,18 +40,14 @@ public class CouponService {
         if(!coupon.getUser().getId().equals(userId))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
 
+        if(coupon.getOptionFunding() != null)
+            throw new CustomException(ErrorCode.ALREADY_USED_COUPON);
+
         price -= coupon.getPrice();
 
         coupon.updateProjectFundingEntity(optionFunding);
 
         return price>0?price:0;
-    }
-
-    public long rollBackUseCoupon(CouponEntity coupon, long price) {
-        price -= coupon.getPrice();
-        coupon.rollBackUseCoupon();
-        couponRepository.save(coupon);
-        return price;
     }
 
 }
