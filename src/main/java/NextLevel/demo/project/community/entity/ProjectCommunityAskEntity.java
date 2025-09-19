@@ -36,12 +36,14 @@ public class ProjectCommunityAskEntity extends BasedEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @OneToOne(mappedBy = "ask")
+    @OneToOne(mappedBy = "ask", cascade = {CascadeType.REMOVE})
     private ProjectCommunityAnswerEntity answer;
 
     public void update(SaveCommunityDto dto) {
         if(dto.getContent()!=null && !dto.getContent().isEmpty())
             this.content = dto.getContent();
     }
+
+    public void setNoAnswer() { answer = null; }
 
 }

@@ -34,6 +34,12 @@ public class ProjectCommunityAnswerService {
 
         projectValidateService.validateAuthor(ask.getProject(), user);
 
+        if(ask.getAnswer() != null) {
+            dto.setId(ask.getAnswer().getId());
+            updateAnswer(dto);
+            return;
+        }
+
         projectCommunityAnswerRepository.save(dto.toAnswerEntity(user, ask));
     }
 
@@ -55,6 +61,7 @@ public class ProjectCommunityAnswerService {
         );
         UserEntity user = userValidateService.getUserInfo(userId);
         projectValidateService.validateAuthor(answer.getAsk().getProject(), user);
+        answer.getAsk().setNoAnswer();
         projectCommunityAnswerRepository.deleteById(answerId);
     }
 
