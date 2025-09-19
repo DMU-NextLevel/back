@@ -1,6 +1,7 @@
 package NextLevel.demo.project.community.entity;
 
 import NextLevel.demo.BasedEntity;
+import NextLevel.demo.project.community.dto.request.SaveCommunityDto;
 import NextLevel.demo.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,5 +31,10 @@ public class ProjectCommunityAnswerEntity extends BasedEntity {
     @OneToOne(targetEntity = ProjectCommunityAskEntity.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "ask_id", nullable = false)
     private ProjectCommunityAskEntity ask;
+
+    public void update(SaveCommunityDto dto) {
+        if(dto.getContent() != null && !dto.getContent().isEmpty())
+            this.content = dto.getContent();
+    }
 
 }

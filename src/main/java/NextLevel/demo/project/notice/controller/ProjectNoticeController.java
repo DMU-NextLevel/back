@@ -2,6 +2,8 @@ package NextLevel.demo.project.notice.controller;
 
 import NextLevel.demo.common.SuccessResponse;
 import NextLevel.demo.project.notice.dto.request.SaveProjectNoticeRequestDto;
+import NextLevel.demo.project.notice.dto.response.ResponseNoticeListDto;
+import NextLevel.demo.project.notice.dto.response.ResponseProjectNoticeDto;
 import NextLevel.demo.project.notice.service.ProjectNoticeService;
 import NextLevel.demo.util.jwt.JWTUtil;
 import jakarta.validation.Valid;
@@ -10,11 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @Slf4j
@@ -22,6 +20,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class ProjectNoticeController {
 
     private final ProjectNoticeService projectNoticeService;
+
+    // select notice by project
+    @GetMapping("/public/project/{projectId}/notice")
+    public ResponseEntity<?> getProjectNotice(@PathVariable Long projectId) {
+        return ResponseEntity.ok().body(new SuccessResponse("success", new ResponseNoticeListDto(projectNoticeService.getAllNotice(projectId))));
+    }
 
     @PostMapping("/api1/project/{projectId}/notice")
     public ResponseEntity<?> addProjectNotice(@PathVariable("projectId") long projectId, @ModelAttribute @Valid SaveProjectNoticeRequestDto dto) {

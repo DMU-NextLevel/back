@@ -4,6 +4,7 @@ import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.repository.ProjectRepository;
+import NextLevel.demo.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,21 @@ public class ProjectValidateService {
 
     public ProjectEntity validateAuthor(Long projectId, Long userId) {
         ProjectEntity project = getProjectEntity(projectId);
-        if(project.getUser().getId() != userId){
+        if(!project.getUser().getId().equals(userId)){
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
         return project;
+    }
+
+    public void validateAuthor(ProjectEntity project, Long userId) {
+        if(!project.getUser().getId().equals(userId)){
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
+        }
+    }
+
+    public void validateAuthor(ProjectEntity project, UserEntity user) {
+        if(!project.getUser().getId().equals(user.getId())){
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
+        }
     }
 }
