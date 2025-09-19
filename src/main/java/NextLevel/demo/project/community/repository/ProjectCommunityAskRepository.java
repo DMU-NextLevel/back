@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ProjectCommunityAskRepository extends JpaRepository<ProjectCommunityAskEntity, Long> {
 
-    @Query("select ask from ProjectCommunityAskEntity ask left join fetch ask.answer where ask.project.id = :projectId")
-    List<ProjectCommunityAskEntity> findAllWithAnswerByProjectId(@Param("projectId") Long projectId);
+    @Query("select ask from ProjectCommunityAskEntity ask left join fetch ask.answer where ask.project.id = :projectId order by ask.createdAt desc")
+    List<ProjectCommunityAskEntity> findAllByProjectIdOrderByCreatedAt(@Param("projectId") Long projectId);
 
 }

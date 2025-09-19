@@ -12,7 +12,7 @@ public class ResponseCommunityListDto {
     private int communityCount;
     private List<ResponseProjectCommunityDto> communities;
 
-    public ResponseCommunityListDto (Collection<ProjectCommunityAskEntity> communities) {
+    public ResponseCommunityListDto (List<ProjectCommunityAskEntity> communities) {
         this.communities = communities.stream().map(e->ResponseProjectCommunityDto.of(e)).toList();
         this.communityCount = communities.size();
     }

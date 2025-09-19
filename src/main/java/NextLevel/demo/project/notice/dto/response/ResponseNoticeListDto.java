@@ -11,7 +11,7 @@ public class ResponseNoticeListDto {
     private int noticeCount;
     private List<ResponseProjectNoticeDto> notices;
 
-    public ResponseNoticeListDto(Set<ProjectNoticeEntity> entities) {
+    public ResponseNoticeListDto(List<ProjectNoticeEntity> entities) {
         this.notices = entities.stream().map(e->ResponseProjectNoticeDto.of(e)).toList();
         this.noticeCount = notices.size();
     }
