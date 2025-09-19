@@ -34,6 +34,7 @@ public enum ErrorCode {
 
     // funding
     NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "05001","not enough point left:%s, need:%s"),
+    ALREADY_USED_COUPON(HttpStatus.BAD_REQUEST, "05002","already used coupon"),
 
     // option
 

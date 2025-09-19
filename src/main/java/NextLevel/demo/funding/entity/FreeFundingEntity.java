@@ -28,4 +28,6 @@ public class FreeFundingEntity {
     @JoinColumn(name = "project_id")
     private ProjectEntity project;
 
+    public void updatePrice(long price) {this.price += price;}
+
 }

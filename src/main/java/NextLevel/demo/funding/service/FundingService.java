@@ -15,14 +15,19 @@ import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.service.ProjectValidateService;
 import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.user.service.UserValidateService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class FundingService {
 
     private final UserValidateService userValidateService;
@@ -62,7 +67,7 @@ public class FundingService {
     }
 
     @Transactional
-    public void optionFunding(RequestOptionFundingDto dto) {
+    public void optionFunding(@Valid RequestOptionFundingDto dto) {
         UserEntity user = userValidateService.getUserInfo(dto.getUserId());
         OptionEntity option = optionValidateService.getOption(dto.getOptionId());
 
@@ -76,19 +81,31 @@ public class FundingService {
         if(totalPrice > user.getPoint())
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(totalPrice));
 
-        optionFundingRepository.save(entity);
+        Optional<OptionFundingEntity> oldOptionFundingOpt = optionFundingRepository.findByOptionIdAndUserId(dto.getOptionId(), dto.getUserId());
+
+        if(oldOptionFundingOpt.isPresent())
+            oldOptionFundingOpt.get().updateCount(dto.getCount());
+        else
+            optionFundingRepository.save(entity);
+
         user.updatePoint(-totalPrice);
     }
 
     @Transactional
-    public void freeFunding(RequestFreeFundingDto dto) {
+    public void freeFunding(@Valid RequestFreeFundingDto dto) {
         UserEntity user = userValidateService.getUserInfo(dto.getUserId());
         ProjectEntity project = projectValidateService.getProjectEntity(dto.getProjectId());
 
         if(dto.getFreePrice() > user.getPoint())
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(dto.getFreePrice()));
 
-        freeFundingRepository.save(dto.toEntity(user, project));
+        Optional<FreeFundingEntity> oldFreeFundingOpt = freeFundingRepository.findByProjectIdAndUserId(project.getId(), dto.getUserId());
+
+        if(oldFreeFundingOpt.isPresent())
+            oldFreeFundingOpt.get().updatePrice(dto.getFreePrice());
+        else
+            freeFundingRepository.save(dto.toEntity(user, project));
+
         user.updatePoint(-dto.getFreePrice());
     }
 
