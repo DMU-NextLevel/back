@@ -27,7 +27,7 @@ public class ProjectCommunityController {
     // list
     @GetMapping("/public/project/{projectId}/community")
     public ResponseEntity getProjectCommunity(@PathVariable Long projectId) {
-        return ResponseEntity.ok().body(new SuccessResponse("success", new ResponseCommunityListDto(communityService.selectAll(projectId))));
+        return ResponseEntity.ok().body(new SuccessResponse("success", new ResponseCommunityListDto(askService.selectAll(projectId))));
     }
 
     // 생성
