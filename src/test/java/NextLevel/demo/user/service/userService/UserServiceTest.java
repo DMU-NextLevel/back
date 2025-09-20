@@ -60,7 +60,7 @@ public class UserServiceTest {
                 .build();
         mockImg = ImgEntity.builder().id(1L).build();
 
-        Mockito.lenient().when(userValidateService.getUserInfo(Mockito.anyLong())).thenReturn(mockUser);
+        Mockito.lenient().when(userValidateService.getUserInfoWithAccessToken(Mockito.anyLong())).thenReturn(mockUser);
         Mockito.lenient().when(imgService.saveImg(Mockito.any(), Mockito.any())).thenReturn(mockImg);
         Mockito.lenient().when(imgService.updateImg(Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(mockImg);
     }

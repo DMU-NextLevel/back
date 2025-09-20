@@ -38,6 +38,9 @@ public enum ErrorCode {
 
     // option
 
+    // follow
+    CAN_NOT_FOLLOW_SELF(HttpStatus.BAD_REQUEST, "07001","can not follow self"),
+
     // 시발 이게 뭐지? error
     SIBAL_WHAT_IS_IT(HttpStatus.INTERNAL_SERVER_ERROR, "05001","알지 모르는 error 발생 : %s");
 

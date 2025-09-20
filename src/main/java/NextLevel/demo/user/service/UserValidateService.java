@@ -19,9 +19,15 @@ public class UserValidateService {
     private final UserRepository userRepository;
     private final UserDetailRepository userDetailRepository;
 
-    public UserEntity getUserInfo(Long userId) {
+    public UserEntity getUserInfoWithAccessToken(Long userId) {
         return userRepository.findUserFullInfoByUserId(userId).orElseThrow(
                 ()->{throw new CustomException(ErrorCode.ACCESS_TOKEN_ERROR);}
+        );
+    }
+
+    public UserEntity findUserWithUserId(Long userId) {
+        return userRepository.findUserFullInfoByUserId(userId).orElseThrow(
+                ()->{throw new CustomException(ErrorCode.NOT_FOUND, "user");}
         );
     }
 

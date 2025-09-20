@@ -39,7 +39,7 @@ public class SocialService {
     @ImgTransaction
     @Transactional
     public void create(RequestSocialCreateDto dto, ArrayList<Path> imgPaths) {
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         SocialEntity social = socialRepository.save(dto.toEntity(user));
 
         saveImgs(dto.getImgs(), social, imgPaths);

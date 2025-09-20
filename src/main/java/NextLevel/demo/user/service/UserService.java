@@ -4,7 +4,6 @@ import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.img.service.ImgService;
 import NextLevel.demo.img.service.ImgTransaction;
-import NextLevel.demo.project.project.dto.response.ResponseProjectListDetailDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.user.dto.user.request.RequestMyPageProjectListDto;
 import NextLevel.demo.user.dto.user.request.RequestUpdatePasswordDto;
@@ -47,7 +46,7 @@ public class UserService {
 
     @Transactional
     public UserEntity updateUserInfo(RequestUpdateUserInfoDto dto, HttpServletRequest request, HttpServletResponse response) {
-        UserEntity oldUser = userValidateService.getUserInfo(dto.getId());
+        UserEntity oldUser = userValidateService.getUserInfoWithAccessToken(dto.getId());
 
         switch(dto.getName()){
             case "email":
