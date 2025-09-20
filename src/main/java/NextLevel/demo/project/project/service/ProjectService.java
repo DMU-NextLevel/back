@@ -14,7 +14,6 @@ import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.repository.ProjectDslRepository;
 import NextLevel.demo.project.project.repository.ProjectRepository;
-import NextLevel.demo.project.story.entity.ProjectStoryEntity;
 import NextLevel.demo.project.story.service.ProjectStoryService;
 import NextLevel.demo.project.tag.service.TagService;
 import NextLevel.demo.project.view.ProjectViewService;
@@ -52,7 +51,7 @@ public class ProjectService {
     @Transactional
     public void save(CreateProjectDto dto, ArrayList<Path> imgPaths) {
         // user 처리
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         validateUser(user);
 
         if(dto.getTitleImg() == null || dto.getTitleImg().isEmpty())
