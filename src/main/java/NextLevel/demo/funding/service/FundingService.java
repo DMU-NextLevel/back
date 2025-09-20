@@ -43,7 +43,7 @@ public class FundingService {
 
     @Transactional
     public void cancelFreeFunding(RequestCancelFundingDto dto) {
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         FreeFundingEntity funding = freeFundingRepository.findById(dto.getId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "freeFunding");}
         );
@@ -55,7 +55,7 @@ public class FundingService {
 
     @Transactional
     public void cancelOptionFunding(RequestCancelFundingDto dto) {
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         OptionFundingEntity funding = optionFundingRepository.findById(dto.getId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "optionFunding");}
         );
@@ -68,7 +68,7 @@ public class FundingService {
 
     @Transactional
     public void optionFunding(@Valid RequestOptionFundingDto dto) {
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         OptionEntity option = optionValidateService.getOption(dto.getOptionId());
 
         OptionFundingEntity entity = dto.toEntity(user, option);
@@ -93,7 +93,7 @@ public class FundingService {
 
     @Transactional
     public void freeFunding(@Valid RequestFreeFundingDto dto) {
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         ProjectEntity project = projectValidateService.getProjectEntity(dto.getProjectId());
 
         if(dto.getFreePrice() > user.getPoint())

@@ -30,7 +30,7 @@ public class ProjectCommunityAnswerService {
         ProjectCommunityAskEntity ask = projectCommunityAskRepository.findById(askId).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "community");}
         );
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
 
         projectValidateService.validateAuthor(ask.getProject(), user);
 
@@ -49,7 +49,7 @@ public class ProjectCommunityAnswerService {
         ProjectCommunityAnswerEntity answer = projectCommunityAnswerRepository.findById(answerId).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "community");}
         );
-        UserEntity user = userValidateService.getUserInfo(dto.getUserId());
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         projectValidateService.validateAuthor(answer.getAsk().getProject(), user);
         answer.update(dto);
     }
@@ -59,7 +59,7 @@ public class ProjectCommunityAnswerService {
         ProjectCommunityAnswerEntity answer = projectCommunityAnswerRepository.findById(answerId).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "community");}
         );
-        UserEntity user = userValidateService.getUserInfo(userId);
+        UserEntity user = userValidateService.getUserInfoWithAccessToken(userId);
         projectValidateService.validateAuthor(answer.getAsk().getProject(), user);
         answer.getAsk().setNoAnswer();
         projectCommunityAnswerRepository.deleteById(answerId);
