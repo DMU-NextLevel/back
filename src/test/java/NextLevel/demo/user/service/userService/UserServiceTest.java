@@ -3,6 +3,7 @@ package NextLevel.demo.user.service.userService;
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.img.entity.ImgEntity;
+import NextLevel.demo.img.service.ImgPath;
 import NextLevel.demo.img.service.ImgService;
 import NextLevel.demo.user.dto.user.request.RequestUpdateUserInfoDto;
 import NextLevel.demo.user.entity.UserEntity;
@@ -146,7 +147,7 @@ public class UserServiceTest {
 
         Assertions.assertThrows(
                 CustomException.class,
-                ()->userService.updateUserImg(1L, null, new ArrayList<Path>())
+                ()->userService.updateUserImg(1L, null, new ImgPath())
         );
     }
 
@@ -158,7 +159,7 @@ public class UserServiceTest {
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(mockUser));
         ArgumentCaptor<ArrayList<Path>> captor = ArgumentCaptor.forClass(ArrayList.class);
 
-        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class) , new ArrayList<Path>());
+        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class) , new ImgPath());
 
         Assertions.assertEquals(oldImg, user.getImg());
     }
@@ -168,7 +169,7 @@ public class UserServiceTest {
         mockUser.setImg(null);
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(mockUser));
 
-        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class), new ArrayList<Path>());
+        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class), new ImgPath());
 
         Assertions.assertEquals(mockImg, user.getImg());
     }

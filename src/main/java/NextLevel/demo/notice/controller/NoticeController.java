@@ -1,6 +1,7 @@
 package NextLevel.demo.notice.controller;
 
 import NextLevel.demo.common.SuccessResponse;
+import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.notice.dto.ResponseNoticeDto;
 import NextLevel.demo.notice.dto.SaveNoticeDto;
 import NextLevel.demo.notice.entity.NoticeEntity;
@@ -52,8 +53,9 @@ public class NoticeController {
     }
 
     @PostMapping("/admin/notice/{id}")
+    @ImgTransaction
     public ResponseEntity<?> removeNotice(@PathVariable("id") Long id) {
-        noticeService.removeNotice(id);
+        noticeService.removeNotice(id, null);
         return ResponseEntity.ok(new SuccessResponse("success", null));
     }
 }

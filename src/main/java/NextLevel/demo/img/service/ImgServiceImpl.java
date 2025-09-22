@@ -35,7 +35,7 @@ public class ImgServiceImpl implements ImgService {
     private final ImgRepository imgRepository;
 
     // @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ImgEntity saveImg(MultipartFile imgFile, ArrayList<Path> imgPaths) {
+    public ImgEntity saveImg(MultipartFile imgFile, ImgPath imgPath) {
         if(imgFile == null || imgFile.isEmpty()) return null;
         try {
             byte[] bytes = imgFile.getBytes();
@@ -43,10 +43,10 @@ public class ImgServiceImpl implements ImgService {
 
             fileName = addImgNumber(fileName);
 
-            Path path = Paths.get(System.getProperty("user.dir") ,IMG_DEFAULT_PATH, fileName);
+            Path path = getPath(fileName); // Paths.get(System.getProperty("user.dir") ,IMG_DEFAULT_PATH, fileName);
 
             Files.write(path, bytes);
-            imgPaths.add(path);
+            imgPath.save(path);
 
             ImgEntity saved = imgRepository.save(new ImgEntity(fileName));
 
@@ -61,13 +61,13 @@ public class ImgServiceImpl implements ImgService {
     }
 
     // img uri 변경 없이 진짜 파일 값만 덮어쓰기
-    public ImgEntity updateImg(MultipartFile imgFile, ImgEntity oldImg, ArrayList<Path> imgPaths) {
+    public ImgEntity updateImg(MultipartFile imgFile, ImgEntity oldImg, ImgPath imgPath) {
         if(oldImg == null){
-            return saveImg(imgFile, imgPaths);
+            return saveImg(imgFile, imgPath);
         }
 
         try {
-            Path path = Paths.get(System.getProperty("user.dir"), IMG_DEFAULT_PATH, oldImg.getUri());
+            Path path = getPath(oldImg.getUri()); // Paths.get(System.getProperty("user.dir"), IMG_DEFAULT_PATH, oldImg.getUri());
 
             Files.write(path, imgFile.getBytes());
 
@@ -84,18 +84,14 @@ public class ImgServiceImpl implements ImgService {
     }
 
     // @Transactional
-    public void deleteImg(ImgEntity img) {
+    public void deleteImg(ImgEntity img, ImgPath imgPath) {
         if(img == null)
             return;
-        
-        try {
-            Files.deleteIfExists(Paths.get(System.getProperty("user.dir") ,IMG_DEFAULT_PATH, img.getUri()));
-            imgRepository.deleteById(img.getId());
-            log.info("deleted image id : " + img.getId());
-        } catch (IOException e) {
-            log.info(e.getMessage());
-            throw new CustomException(ErrorCode.ERROR_ON_DELETE_IMG);
-        }
+
+        // Files.deleteIfExists();
+        imgPath.delete(getPath(img.getUri()));
+        imgRepository.deleteById(img.getId());
+        log.info("deleted image id : " + img.getId());
     }
 
     public ImgEntity saveSocialImg(String imgURL) {
@@ -156,5 +152,9 @@ public class ImgServiceImpl implements ImgService {
             log.info("delete img file " + path);
             Files.deleteIfExists(path);
         }
+    }
+
+    private Path getPath(String uri) {
+        return Paths.get(System.getProperty("user.dir") ,IMG_DEFAULT_PATH, uri);
     }
 }

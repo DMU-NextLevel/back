@@ -31,7 +31,7 @@ public class SocialController {
 
     @DeleteMapping("/api1/social/{socialId}")
     public ResponseEntity delete(@PathVariable("socialId") Long socialId) {
-        socialService.delete(socialId, JWTUtil.getUserIdFromSecurityContext());
+        socialService.delete(socialId, JWTUtil.getUserIdFromSecurityContext(), null);
         return ResponseEntity.ok().body(new SuccessResponse("success", null));
     }
 

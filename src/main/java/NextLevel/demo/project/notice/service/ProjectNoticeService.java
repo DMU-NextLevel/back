@@ -3,6 +3,7 @@ package NextLevel.demo.project.notice.service;
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.img.entity.ImgEntity;
+import NextLevel.demo.img.service.ImgPath;
 import NextLevel.demo.img.service.ImgServiceImpl;
 import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.project.notice.dto.request.SaveProjectNoticeRequestDto;
@@ -36,20 +37,20 @@ public class ProjectNoticeService {
 
     @Transactional
     @ImgTransaction
-    public void saveProjectNotice(SaveProjectNoticeRequestDto dto, ArrayList<Path> imgPaths) {
+    public void saveProjectNotice(SaveProjectNoticeRequestDto dto, ImgPath imgPath) {
         ProjectEntity project = projectValidateService.getProjectEntity(dto.getProjectId());
 
         if(!project.getUser().getId().equals(dto.getUserId()))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
 
-        ImgEntity savedImg = imgService.saveImg(dto.getImg(), imgPaths);
+        ImgEntity savedImg = imgService.saveImg(dto.getImg(), imgPath);
 
         projectNoticeRepository.save(dto.toEntity(savedImg, project));
     }
 
     @Transactional
     @ImgTransaction
-    public void updateNotice(SaveProjectNoticeRequestDto dto,  ArrayList<Path> imgPaths) {
+    public void updateNotice(SaveProjectNoticeRequestDto dto,  ImgPath imgPath) {
         ProjectNoticeEntity notice = projectNoticeRepository.findByIdWithProject(dto.getNoticeId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "notice");}
         );
@@ -60,7 +61,7 @@ public class ProjectNoticeService {
         notice.update(dto);
 
         if(dto.getImg() != null && !dto.getImg().isEmpty()) {
-            ImgEntity savedImg = imgService.updateImg(dto.getImg(), notice.getImg(), imgPaths);
+            ImgEntity savedImg = imgService.updateImg(dto.getImg(), notice.getImg(), imgPath);
             if(notice.getImg() == null)
                 notice.setImg(savedImg);
         }

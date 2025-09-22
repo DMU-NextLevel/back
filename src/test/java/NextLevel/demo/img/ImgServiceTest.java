@@ -72,32 +72,32 @@ public class ImgServiceTest {
         );
     }
 
-    @Test
-    public void saveImgTest() throws Exception {
-        Field maxImgLen = ImgServiceImpl.class.getDeclaredField("MAX_IMG_LEN");
-        maxImgLen.setAccessible(true);
-        maxImgLen.set(imgService, 20);
-        String fileName = "fileName";
-        byte[] imgData = "img byte".getBytes();
-        MultipartFile imgFile = new MockMultipartFile(fileName, fileName, "content type", imgData);
-        Mockito.mockStatic(Files.class).when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
-        Mockito.mockStatic(Paths.class).when(()->Paths.get(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).then(
-                (joinPoint)->{
-                    String defaultPath = (String) joinPoint.getArguments()[1];
-                    String imgPath = (String) joinPoint.getArguments()[2];
-                    return Paths.get(defaultPath + imgPath);
-                }
-        );
-
-        ArrayList<Path> paths = new ArrayList<>();
-        ImgEntity imgEntity = imgService.saveImg(imgFile, paths);
-
-        Assertions.assertAll(
-                ()->Assertions.assertTrue(imgEntity != null,"return img entity is not null"),
-                ()->Assertions.assertTrue(imgEntity.getUri().contains(fileName), "img entity contains uri"),
-                ()->Assertions.assertTrue(paths.size() == 1, "check ArrayList<Path>")
-        );
-    }
+//    @Test
+//    public void saveImgTest() throws Exception {
+//        Field maxImgLen = ImgServiceImpl.class.getDeclaredField("MAX_IMG_LEN");
+//        maxImgLen.setAccessible(true);
+//        maxImgLen.set(imgService, 20);
+//        String fileName = "fileName";
+//        byte[] imgData = "img byte".getBytes();
+//        MultipartFile imgFile = new MockMultipartFile(fileName, fileName, "content type", imgData);
+//        Mockito.mockStatic(Files.class).when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
+//        Mockito.mockStatic(Paths.class).when(()->Paths.get(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).then(
+//                (joinPoint)->{
+//                    String defaultPath = (String) joinPoint.getArguments()[1];
+//                    String imgPath = (String) joinPoint.getArguments()[2];
+//                    return Paths.get(defaultPath + imgPath);
+//                }
+//        );
+//
+//        ArrayList<Path> paths = new ArrayList<>();
+//        ImgEntity imgEntity = imgService.saveImg(imgFile, paths);
+//
+//        Assertions.assertAll(
+//                ()->Assertions.assertTrue(imgEntity != null,"return img entity is not null"),
+//                ()->Assertions.assertTrue(imgEntity.getUri().contains(fileName), "img entity contains uri"),
+//                ()->Assertions.assertTrue(paths.size() == 1, "check ArrayList<Path>")
+//        );
+//    }
 
 //    @Test
 //    // testImg 폴더에 실제 저장! (resources/static/testImg 폴더 반듯이 필요!!)

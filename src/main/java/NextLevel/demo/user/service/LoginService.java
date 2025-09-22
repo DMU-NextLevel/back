@@ -1,6 +1,7 @@
 package NextLevel.demo.user.service;
 
 import NextLevel.demo.img.entity.ImgEntity;
+import NextLevel.demo.img.service.ImgPath;
 import NextLevel.demo.img.service.ImgServiceImpl;
 import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.user.dto.RequestUserCreateDto;
@@ -64,13 +65,13 @@ public class LoginService {
     // user UserController : post register
     @ImgTransaction
     @Transactional
-    public UserDetailEntity register(@Valid RequestUserCreateDto dto, ArrayList<Path> imgPaths) {
+    public UserDetailEntity register(@Valid RequestUserCreateDto dto, ImgPath imgPath) {
         userValidateService.checkEmailAndNickNameElseThrow(dto.getEmail(), dto.getNickName());
 
         // save img get uri
         ImgEntity savedImg = null;
         try {
-            savedImg = imgService.saveImg(dto.getImg(), imgPaths);
+            savedImg = imgService.saveImg(dto.getImg(), imgPath);
         }catch (CustomException e) {;}
         dto.setImgEntity(savedImg);
 
