@@ -123,3 +123,20 @@ DOMAIN: nextlevel.r-e.kr
 FRONT:
   baseUrl:
     https://nextlevel.r-e.kr
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password:
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+    hibernate:
+      ddl-auto: create-drop
