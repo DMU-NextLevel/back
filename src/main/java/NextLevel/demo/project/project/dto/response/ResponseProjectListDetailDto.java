@@ -2,14 +2,13 @@ package NextLevel.demo.project.project.dto.response;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import NextLevel.demo.img.ImgDto;
 import NextLevel.demo.img.entity.ImgEntity;
-import NextLevel.demo.project.tag.entity.ProjectTagEntity;
-import NextLevel.demo.project.tag.entity.TagEntity;
+import NextLevel.demo.project.ProjectStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,8 +37,10 @@ public class ResponseProjectListDetailDto {
     private LocalDateTime createdAt;
 
     private Boolean isLiked;
-    private LocalDateTime expired;
-    private Boolean isExpired;
+    private LocalDate expiredAt;
+    private LocalDate startAt;
+
+    private String status;
 
     @JsonIgnore
     private LocalDateTime projectViewCreateAt;
@@ -49,8 +50,10 @@ public class ResponseProjectListDetailDto {
         String title,
         ImgEntity titleImg,
         LocalDateTime createdAt,
-        LocalDateTime expired,
+        LocalDate expired,
+        LocalDate start,
         long goal,
+        ProjectStatus status,
         Double completionRate,
         long likeCount,
         long userCount,
@@ -66,11 +69,12 @@ public class ResponseProjectListDetailDto {
         this.createdAt = createdAt;
         this.userCount = userCount;
         this.isLiked = isLiked != 0L;
-        this.isExpired = expired.isBefore(LocalDateTime.now());
-        this.expired = expired;
+        this.expiredAt = expired;
+        this.startAt = start;
         this.viewCount = viewCount;
         // this.totalCount = totalCount;
         this.projectViewCreateAt = projectViewCreateAt;
+        this.status = status.name();
     }
 
 }

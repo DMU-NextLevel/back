@@ -1,6 +1,7 @@
 package NextLevel.demo.project.project.repository;
 
 import NextLevel.demo.funding.repository.FundingDslRepository;
+import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.dto.request.RequestMainPageProjectListDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDetailDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
@@ -32,6 +33,7 @@ public class ProjectDslRepository {
                 .builder()
                 .where(QProjectEntity.class, (project)->whereSearch(project, dto.getSearch()))
                 .where(QProjectEntity.class, (projectEntity)->whereTag(projectEntity, dto.getTagIds()))
+                .where(QProjectEntity.class, (projectEntity) -> projectEntity.projectStatus.in(ProjectStatus.PROGRESS, ProjectStatus.STOPPED))
                 .orderBy(QProjectEntity.class, (project)->orderByType(project, ProjectOrderType.getType(dto.getOrder()), dto.getDesc()))
                 .limit(dto.getLimit(), dto.getPage())
                 .commit(dto.getUserId());
@@ -67,7 +69,7 @@ public class ProjectDslRepository {
                 order = Expressions.asNumber(selectProjectRepository.likeCount(projectEntity));
                 break;
             case ProjectOrderType.EXPIRED:
-                order = projectEntity.expired;
+                order = projectEntity.expiredAt;
                 break;
             case ProjectOrderType.USER:
                 order = Expressions.asNumber(fundingDslRepository.fundingUserCount(projectEntity));

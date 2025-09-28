@@ -54,28 +54,28 @@ public class ProjectController {
     }
 
     // 모두 조회
-    @GetMapping("/public/project/all")
-    public ResponseEntity<?> getAllProjects(
-            @RequestParam(value = "order", required = false) String order,
-            @RequestParam(value = "tag", required = false) List<Long> tagId,
-            @RequestParam(value = "page", required = false) Integer page ,
-            @RequestParam(value = "search", required = false) String search ,
-            @RequestParam(value = "desc", required = false) Boolean desc)
-    {
-        Long userId = JWTUtil.getUserIdFromSecurityContextCanNULL();
-
-        RequestMainPageProjectListDto dto = RequestMainPageProjectListDto.builder()
-            .tag(tagId)
-            .page(page)
-            .order(order)
-            .userId(userId)
-            .search(search)
-            .desc(desc)
-            .build();
-
-        ResponseProjectListDto resultDto = projectService.getAllProjects(dto);
-        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success" ,resultDto));
-    }
+//    @GetMapping("/public/project/all")
+//    public ResponseEntity<?> getAllProjects(
+//            @RequestParam(value = "order", required = false) String order,
+//            @RequestParam(value = "tag", required = false) List<Long> tagId,
+//            @RequestParam(value = "page", required = false) Integer page ,
+//            @RequestParam(value = "search", required = false) String search ,
+//            @RequestParam(value = "desc", required = false) Boolean desc)
+//    {
+//        Long userId = JWTUtil.getUserIdFromSecurityContextCanNULL();
+//
+//        RequestMainPageProjectListDto dto = RequestMainPageProjectListDto.builder()
+//            .tag(tagId)
+//            .page(page)
+//            .order(order)
+//            .userId(userId)
+//            .search(search)
+//            .desc(desc)
+//            .build();
+//
+//        ResponseProjectListDto resultDto = projectService.getAllProjects(dto);
+//        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success" ,resultDto));
+//    }
 
     @PostMapping("/public/project/all")
     public ResponseEntity<?> getAllProjects(

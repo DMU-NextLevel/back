@@ -86,8 +86,10 @@ public class SelectProjectListDslRepository {
                         projectEntity.title,
                         projectEntity.titleImg,
                         projectEntity.createdAt,
-                        projectEntity.expired,
+                        projectEntity.expiredAt,
+                        projectEntity.startAt,
                         projectEntity.goal,
+                        projectEntity.projectStatus,
 
                         // completeRate
                         fundingDslRepository.completeRate(projectEntity),
