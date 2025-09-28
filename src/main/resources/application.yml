@@ -139,4 +139,8 @@ spring:
       hibernate:
         show_sql: true
     hibernate:
+<<<<<<< Updated upstream
       ddl-auto: create-drop
+=======
+      ddl-auto: update
+>>>>>>> Stashed changes
