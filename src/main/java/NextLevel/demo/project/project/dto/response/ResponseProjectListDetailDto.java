@@ -9,6 +9,7 @@ import java.util.List;
 import NextLevel.demo.img.ImgDto;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.project.ProjectStatus;
+import NextLevel.demo.project.project.entity.ProjectEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,16 +45,12 @@ public class ResponseProjectListDetailDto {
 
     @JsonIgnore
     private LocalDateTime projectViewCreateAt;
+    @JsonIgnore
+    private ProjectEntity projectEntity;
 
     public ResponseProjectListDetailDto(
-        Long id,
-        String title,
-        ImgEntity titleImg,
-        LocalDateTime createdAt,
-        LocalDate expired,
-        LocalDate start,
-        long goal,
-        ProjectStatus status,
+        ProjectEntity projectEntity,
+
         Double completionRate,
         long likeCount,
         long userCount,
@@ -61,20 +58,22 @@ public class ResponseProjectListDetailDto {
         long viewCount,
         LocalDateTime projectViewCreateAt // select distinct 용 column
     ) {
-        this.id = id;
-        this.title = title;
-        this.titleImg = new ImgDto(titleImg);
+        this.id = projectEntity.getId();
+        this.title = projectEntity.getTitle();
+        this.titleImg = new ImgDto(projectEntity.getTitleImg());
         this.completionRate = completionRate!=null ?  new BigDecimal(completionRate).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
         this.likeCount = likeCount;
-        this.createdAt = createdAt;
+        this.createdAt = projectEntity.getCreatedAt();
         this.userCount = userCount;
         this.isLiked = isLiked != 0L;
-        this.expiredAt = expired;
-        this.startAt = start;
+        this.expiredAt = projectEntity.getExpiredAt();
+        this.startAt = projectEntity.getStartAt();
         this.viewCount = viewCount;
         // this.totalCount = totalCount;
         this.projectViewCreateAt = projectViewCreateAt;
-        this.status = status.name();
+        this.status = projectEntity.getProjectStatus().name();
+
+        this.projectEntity = projectEntity;
     }
 
 }

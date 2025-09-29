@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.util.List;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -42,7 +43,7 @@ public class OptionEntity {
     private ProjectEntity project;
 
     @OneToMany(mappedBy = "option", fetch = FetchType.LAZY)
-    private Set<OptionFundingEntity> fundings;
+    private List<OptionFundingEntity> fundings;
 
     public void update(SaveOptionRequestDto dto) {
         if(dto.getDescription() != null && !dto.getDescription().isEmpty())

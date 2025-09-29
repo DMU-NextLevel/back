@@ -3,6 +3,7 @@ package NextLevel.demo.user.repository;
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.funding.repository.FundingDslRepository;
+import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.QProjectEntity;
 import NextLevel.demo.project.select.SelectProjectListDslRepository;
@@ -26,9 +27,16 @@ public class UserProjectDslRepository {
     public ResponseProjectListDto myProject(RequestMyPageProjectListDto dto) {
         SelectProjectListDslRepository.Builder builder = selectProjectRepository.builder();
         builder = where(builder, dto.getUserId(), dto.getType());
+        builder = where(builder, dto.getProjectStatus());
         return builder
                 .limit(dto.getLimit(), dto.getPage())
                 .commit(dto.getUserId());
+    }
+
+    private SelectProjectListDslRepository.Builder where(SelectProjectListDslRepository.Builder builder, ProjectStatus projectStatus) {
+        if(projectStatus == null)
+            return builder;
+        return builder.where(QProjectEntity.class, (project)->project.projectStatus.eq(projectStatus));
     }
 
     private SelectProjectListDslRepository.Builder where(SelectProjectListDslRepository.Builder builder, Long userId, MyPageProjectListType type) {

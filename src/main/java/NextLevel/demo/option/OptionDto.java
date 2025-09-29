@@ -7,13 +7,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResponseOptionDto {
+public class OptionDto {
     private Long id;
     private Integer price;
     private String description;
 
-    public static ResponseOptionDto of(OptionEntity entity) {
-        ResponseOptionDto dto = new ResponseOptionDto();
+    public static OptionDto of(OptionEntity entity) {
+        OptionDto dto = new OptionDto();
         dto.id =entity.getId();
         dto.price = entity.getPrice();
         dto.description = entity.getDescription();

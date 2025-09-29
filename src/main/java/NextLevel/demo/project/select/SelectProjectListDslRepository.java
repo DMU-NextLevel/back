@@ -82,14 +82,7 @@ public class SelectProjectListDslRepository {
     ) {
         return queryFactory
                 .selectDistinct(Projections.constructor(ResponseProjectListDetailDto.class,
-                        projectEntity.id,
-                        projectEntity.title,
-                        projectEntity.titleImg,
-                        projectEntity.createdAt,
-                        projectEntity.expiredAt,
-                        projectEntity.startAt,
-                        projectEntity.goal,
-                        projectEntity.projectStatus,
+                        projectEntity,
 
                         // completeRate
                         fundingDslRepository.completeRate(projectEntity),
@@ -111,8 +104,8 @@ public class SelectProjectListDslRepository {
                 .from(projectEntity)
                 // .leftJoin(imgEntity).on(projectEntity.titleImg.id.eq(imgEntity.id)).fetchJoin()
                 // .leftJoin(projectTagEntity).on(projectEntity.id.eq(projectTagEntity.project.id))
-                .leftJoin(likeEntity).on(projectEntity.id.eq(likeEntity.project.id))
-                .leftJoin(projectViewEntity).on(latestProjectViewOn(projectEntity, projectViewEntity, userId))
+                .leftJoin(likeEntity).on(projectEntity.id.eq(likeEntity.project.id)).fetchJoin()
+                .leftJoin(projectViewEntity).on(latestProjectViewOn(projectEntity, projectViewEntity, userId)).fetchJoin()
                 .where(where)
                 .orderBy(orderBy)
                 .limit(limit) //(dto.getPageCount())
@@ -152,11 +145,14 @@ public class SelectProjectListDslRepository {
 
     private List<ResponseProjectListDetailDto> setTag(List<ResponseProjectListDetailDto> projectList){
         Map<Long, ProjectEntity> tagMap = new HashMap<Long, ProjectEntity>();
+        List<Long> projectIds = projectList.stream().map(projectListDto->projectListDto.getId()).toList();
+        QProjectEntity projectEntityForTag = new QProjectEntity("projectEntityForTag");
+
         List<ProjectEntity> projectListWithTag = queryFactory
-                .select(projectEntity)
-                .from(projectEntity)
-                .leftJoin(projectTagEntity).on(projectEntity.id.eq(projectTagEntity.project.id))
-                .where(projectEntity.id.eq(projectEntity.id))
+                .select(projectEntityForTag)
+                .from(projectEntityForTag)
+                .leftJoin(projectTagEntity).on(projectEntityForTag.id.eq(projectTagEntity.project.id))
+                .where(projectEntityForTag.id.in(projectIds))
                 .fetch();
         projectListWithTag.stream().forEach(projectEntity -> tagMap.put(projectEntity.getId(), projectEntity));
 
