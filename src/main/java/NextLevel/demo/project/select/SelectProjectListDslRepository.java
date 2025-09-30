@@ -16,6 +16,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import java.util.ArrayList;
@@ -32,20 +33,56 @@ public class SelectProjectListDslRepository {
     private final JPAQueryFactory queryFactory;
     private final FundingDslRepository fundingDslRepository;
 
-    private QProjectEntity projectEntity = QProjectEntity.projectEntity;
-    private QProjectTagEntity projectTagEntity = QProjectTagEntity.projectTagEntity;
-    private QLikeEntity likeEntity = QLikeEntity.likeEntity;
-    private QProjectViewEntity projectViewEntity = QProjectViewEntity.projectViewEntity;
-    private QImgEntity imgEntity = QImgEntity.imgEntity;
+    private QProjectEntity projectEntity = new QProjectEntity("default_project");
 
-    public Builder builder() { return new Builder(); }
+    public Builder builder(Long userId) { return new Builder(queryFactory, userId); }
 
     public class Builder {
+        private JPAQuery<ResponseProjectListDetailDto> query;
         private BooleanExpression where = Expressions.TRUE;
         private List<OrderSpecifier> orderBy = new ArrayList<>();
         private long limit;
         private long page;
+        private Long userId;
 
+        private QLikeEntity likeEntity = new QLikeEntity("default_like");
+        private QLikeEntity isLikeEntity = new QLikeEntity("default_is_like");
+        private QProjectViewEntity viewEntity = new QProjectViewEntity("default_view");
+
+        public Builder(JPAQueryFactory queryFactory, Long userId) {
+            this.userId = userId;
+            query = queryFactory
+                    .select(Projections.constructor(ResponseProjectListDetailDto.class,
+                        projectEntity,
+                        // completeRate
+                        fundingDslRepository.completeRate(projectEntity),
+                        // like count
+                        likeEntity.count(),
+                        // user_count
+                        fundingDslRepository.fundingUserCount(projectEntity),
+                        // is_like
+                        isLikeEntity.isNotNull(),
+                        // view_count
+                        viewEntity.count()
+                    ))
+                    .from(projectEntity)
+                    .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
+                    .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(isLikeEntity.user.id.eq(userId)))
+                    .leftJoin(viewEntity).on(viewEntity.project.id.eq(projectEntity.id))
+                    .leftJoin(projectEntity).on().fetchJoin();
+        }
+        public <T extends EntityPathBase,J extends EntityPathBase> Builder leftJoin(
+                T joinEntity,
+                Class<J> entityClass, FunctionInterface<BooleanExpression, J> onFunction,
+                boolean isFetch
+        ){
+            J entity = (J) getEntity(entityClass);
+            if(isFetch)
+                query.leftJoin(joinEntity).on(onFunction.function(entity)).fetchJoin();
+            else
+                query.leftJoin(joinEntity).on(onFunction.function(entity));
+            return this;
+        }
         public <T extends EntityPathBase> Builder where(Class<T> entityClass, FunctionInterface<BooleanExpression, T> whereFunction) {
             where = where.and(whereFunction.function(getEntity(entityClass))); return this;
         }
@@ -55,81 +92,90 @@ public class SelectProjectListDslRepository {
         public Builder limit(long limit, long page) {
             this.limit = limit; this.page = page; return this;
         }
-        public ResponseProjectListDto commit(Long userId){
+        public ResponseProjectListDto commit(){
             orderBy.add(projectEntity.createdAt.desc());
-            List<ResponseProjectListDetailDto> projectList = selectProjectsWithSingle(userId, where, orderBy.toArray(OrderSpecifier[]::new), limit, page * limit);
+            //List<ResponseProjectListDetailDto> projectList = selectProjectsWithSingle(userId, where, orderBy.toArray(OrderSpecifier[]::new), limit, page * limit);
+            List<ResponseProjectListDetailDto> projectList =
+                    query
+                            .where(where)
+                            .orderBy(orderBy.toArray(OrderSpecifier[]::new))
+                            .groupBy(projectEntity)
+                            .limit(limit)
+                            .offset(page * limit)
+                            .fetch();
             projectList = setTag(projectList);
             return new ResponseProjectListDto(projectList, totalCount(where), limit, page);
         }
 
         private <T extends EntityPathBase> T getEntity(Class<T> entityClass) {
-            if(entityClass.equals(QProjectTagEntity.class))
-                return (T) projectTagEntity;
             if(entityClass.equals(QProjectViewEntity.class))
-                return (T) projectViewEntity;
+                return (T) viewEntity;
             if(entityClass.equals(QLikeEntity.class))
                 return (T) likeEntity;
-            else
+            if(entityClass.equals(QProjectEntity.class))
                 return (T) projectEntity;
+            else
+                return null;
         }
     }
-
-    private List<ResponseProjectListDetailDto> selectProjectsWithSingle (
-            Long userId,
-            BooleanExpression where,
-            OrderSpecifier[] orderBy,
-            long limit, long offset
-    ) {
-        return queryFactory
-                .selectDistinct(Projections.constructor(ResponseProjectListDetailDto.class,
-                        projectEntity,
-
-                        // completeRate
-                        fundingDslRepository.completeRate(projectEntity),
-
-                        // like count
-                        likeCount(projectEntity),
-
-                        // user_count
-                        fundingDslRepository.fundingUserCount(projectEntity),
-
-                        // is_like
-                        isLike(projectEntity, userId),
-
-                        // view_count
-                        viewCount(projectEntity),
-
-                        projectViewEntity.createAt // select distinct 용 컬럼
-                ))
-                .from(projectEntity)
-                // .leftJoin(imgEntity).on(projectEntity.titleImg.id.eq(imgEntity.id)).fetchJoin()
-                // .leftJoin(projectTagEntity).on(projectEntity.id.eq(projectTagEntity.project.id))
-                .leftJoin(likeEntity).on(projectEntity.id.eq(likeEntity.project.id)).fetchJoin()
-                .leftJoin(projectViewEntity).on(latestProjectViewOn(projectEntity, projectViewEntity, userId)).fetchJoin()
-                .where(where)
-                .orderBy(orderBy)
-                .limit(limit) //(dto.getPageCount())
-                .offset(offset) // (dto.getPageCount() * dto.getPage())
-                .fetch();
-    }
-
-    private BooleanExpression latestProjectViewOn(
-            QProjectEntity project,
-            QProjectViewEntity projectView, Long userId
-    ) {
-        QProjectViewEntity subView = new QProjectViewEntity("subView");
-
-        if(userId == null)
-            return Expressions.FALSE;
-
-        return projectView.id.eq(
-                JPAExpressions
-                        .select(subView.id.max())
-                        .from(subView)
-                        .where(subView.project.id.eq(project.id).and(subView.user.id.eq(userId)))
-                        .groupBy(subView.user.id)
-        );
-    }
+//
+//    private List<ResponseProjectListDetailDto> selectProjectsWithSingle (
+//            Long userId,
+//            BooleanExpression where,
+//            OrderSpecifier[] orderBy,
+//            long limit, long offset
+//    ) {
+//        JPAQuery<ResponseProjectListDetailDto> ob = queryFactory
+//                .selectDistinct(Projections.constructor(ResponseProjectListDetailDto.class,
+//                        projectEntity,
+//
+//                        // completeRate
+//                        fundingDslRepository.completeRate(projectEntity),
+//
+//                        // like count
+//                        likeCount(projectEntity),
+//
+//                        // user_count
+//                        fundingDslRepository.fundingUserCount(projectEntity),
+//
+//                        // is_like
+//                        isLike(projectEntity, userId),
+//
+//                        // view_count
+//                        viewCount(projectEntity),
+//
+//                        projectViewEntity.createAt // select distinct 용 컬럼
+//                ))
+//                .from(projectEntity); // 그냥 여기서 return 을 때리고 나머지를 다른 부분에서 구현한다면? 아님 진짜 불리를 하는게 맞는 건가?
+//
+//
+//
+//                .leftJoin(likeEntity).on(projectEntity.id.eq(likeEntity.project.id)).fetchJoin()
+//                .leftJoin(projectViewEntity).on(latestProjectViewOn(projectEntity, projectViewEntity, userId)).fetchJoin()
+//                .where(where)
+//                .orderBy(orderBy)
+//                .limit(limit) //(dto.getPageCount())
+//                .offset(offset) // (dto.getPageCount() * dto.getPage())
+//                .fetch();
+//    }
+//
+//    private BooleanExpression latestProjectViewOn(
+//            QProjectEntity project,
+//            QProjectViewEntity projectView, Long userId
+//    ) {
+//        QProjectViewEntity subView = new QProjectViewEntity("subView");
+//
+//        if(userId == null)
+//            return Expressions.FALSE;
+//
+//        return projectView.id.eq(
+//                JPAExpressions
+//                        .select(subView.id.max())
+//                        .from(subView)
+//                        .where(subView.project.id.eq(project.id).and(subView.user.id.eq(userId)))
+//                        .groupBy(subView.user.id)
+//        );
+//    }
 
 
     private long totalCount(BooleanExpression where){
@@ -146,13 +192,14 @@ public class SelectProjectListDslRepository {
     private List<ResponseProjectListDetailDto> setTag(List<ResponseProjectListDetailDto> projectList){
         Map<Long, ProjectEntity> tagMap = new HashMap<Long, ProjectEntity>();
         List<Long> projectIds = projectList.stream().map(projectListDto->projectListDto.getId()).toList();
-        QProjectEntity projectEntityForTag = new QProjectEntity("projectEntityForTag");
+        QProjectEntity project = new QProjectEntity("projectEntityForTag");
+        QProjectTagEntity projectTag = new QProjectTagEntity("projectTagEntityForTag");
 
         List<ProjectEntity> projectListWithTag = queryFactory
-                .select(projectEntityForTag)
-                .from(projectEntityForTag)
-                .leftJoin(projectTagEntity).on(projectEntityForTag.id.eq(projectTagEntity.project.id))
-                .where(projectEntityForTag.id.in(projectIds))
+                .select(project)
+                .from(project)
+                .leftJoin(projectTag).on(project.id.eq(projectTag.project.id))
+                .where(project.id.in(projectIds))
                 .fetch();
         projectListWithTag.stream().forEach(projectEntity -> tagMap.put(projectEntity.getId(), projectEntity));
 
@@ -162,29 +209,29 @@ public class SelectProjectListDslRepository {
         return projectList;
     }
 
-    public Expression<Long> isLike(QProjectEntity projectEntity, Long userId) {
-        if(userId == null)
-            return Expressions.constant(0L);
-
-        return JPAExpressions
-            .select(likeEntity.user.id)
-            .from(likeEntity)
-            .where(likeEntity.project.id.eq(projectEntity.id).and(likeEntity.user.id.eq(userId)));
-    }
-
-    public Expression<Long> viewCount(QProjectEntity projectEntity) {
-        return JPAExpressions
-            .select(projectViewEntity.count())
-            .from(projectViewEntity)
-            .where(projectViewEntity.project.id.eq(projectEntity.id));
-    }
-
-
-    public Expression<Long> likeCount(QProjectEntity projectEntity) {
-        return JPAExpressions
-            .select(likeEntity.count())
-            .from(likeEntity)
-            .where(likeEntity.project.id.eq(projectEntity.id));
-    }
+//    public Expression<Long> isLike(QProjectEntity projectEntity, Long userId) {
+//        if(userId == null)
+//            return Expressions.constant(0L);
+//
+//        return JPAExpressions
+//            .select(likeEntity.user.id)
+//            .from(likeEntity)
+//            .where(likeEntity.project.id.eq(projectEntity.id).and(likeEntity.user.id.eq(userId)));
+//    }
+//
+//    public Expression<Long> viewCount(QProjectEntity projectEntity) {
+//        return JPAExpressions
+//            .select(projectViewEntity.count())
+//            .from(projectViewEntity)
+//            .where(projectViewEntity.project.id.eq(projectEntity.id));
+//    }
+//
+//
+//    public Expression<Long> likeCount(QProjectEntity projectEntity) {
+//        return JPAExpressions
+//            .select(likeEntity.count())
+//            .from(likeEntity)
+//            .where(likeEntity.project.id.eq(projectEntity.id));
+//    }
 
 }

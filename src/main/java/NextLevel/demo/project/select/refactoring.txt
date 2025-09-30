@@ -1,0 +1,102 @@
+main page : project list api (tag, search)
+my page - 최근 본 project list (view)
+my page - 내가 생성한 project list (tag, status)
+
+my page - 내가 펀딩한 펀딩 리스트 with funding : (tag, status, with funding data)
+my page - 내가 생성한 펀딩 리스트 : (tag, status, with funding data)
+
+select 문에 있는 서브 쿼리
+    like count :
+    is like (이정도는 괜찮지 않나?)
+    funding price(completeRate) : funding 을 left join한다 해도 서브 쿼리 사용이 좀더 적절함
+    view count :
+
+project view table
+
+만약 distinct를 제외한다면? : 중복 문제 발생 (left join으로 인한 project entity 중복)
+distinct를 사용한다면 left join ProjectView에서 문제 발생(distinct를 적용하기 위해서는 select에 ProjectView의 col중 한개 가 필요함)
+결국 답은 group by project인데
+    그럼 like, view table은 무조건 left join해야함
+        나의 like, view가 필요하면 추가 where절을 작성
+
+group by를 잡으면 order by에
+    조회수 순, like 순, createdAt, completeRate순, expired순 : 모두 가능
+
+결론
+    like, view 는 무조건 left join
+    추가 like, view 가 필요하면 새 table left join을 추가해 사용 (기존 like, view에 where을 결면 select 의 값도 변경됨)
+    group by project 사용!
+
+1. 첫 목표였던 left join또한 외부 적용 시키기 (default like, view table은 밖으로 반출 X?)
+    외부에서 left join table을 집어 넣는다면 구지 힘들게 내부에서 QEntity를 관리할 이유가 없음 (이전 구현 내용이 모두 버려지게 됨 ㅅㅂ)
+2. 이전 sub query default join table 사용으로 변경하기
+3. group by 시도하기
+4. is like column또한 default like table 사용 시도하기 : 결국 서브 쿼리 잖아 바보야
+    내가 누른 like는 project별 한개 씩만 존재함 -> 때문에 left join을 해도 row에 영향을 미치지 않음 (존재 하거나 null이거나 이기 때문)
+    새로운 like table을 left join하고 존재 유뮤만 판단 하는게 더 빠름!
+5. left join table 검사 하기
+6. query 속도 측정해 보기
+
+구현 중에 또 다른 문제 발생
+  외부에서 left join할 table을 준다면 구지 내부에서 join할 table을 관리하고 where, order by절에서 제공할 필요가 있을까?
+  그냥 외부 변수로 처리하면 될 문제 아닌가?
+1. 외부 변수 처리
+2. 내부에서 Map을 통해 관리
+3. 모든 table을 Builder 이내 변수로 선언하고, null인 경우 생성하는 방식 (중복 table join 불가)
+
+refactoring의 이유였던 외부 사용 코드의 가독성, 중복 최소화를 고려한다면 내부 관리가 옭다
+내부 코드 최적화를 고려한다면 외부 변수 관리가 옭다
+
+내부에서 처리했을 때 발생 가능 문제가 있는가? 동시성 문제 없음, table문제 없음
+
+내부 Map함수를 통해 처리하는 것으로 결정
+
+외부처리 했을 때 Service code예시
+    QProjectTagEntity projectTag = new QProjectTagEntity("project_tag");
+    SelectProjectList
+        .builder(userId)
+        .leftJoin(
+            projectTag,
+            QProjectEntity.class, // can null , null 인경우 통합 구현 가능?
+            (project)->projectTag.project.id.eq(project.id),
+            true
+        )
+        .where(()->{projectTag.id.in(tagIds)}
+        .where(QProjectLikeEntity, (like) -> like.isNotNull())
+        .fetch();
+    단점 :
+     leftjoin, where, order by모두 함수 2개씩 필요함
+     default like table이 2개인데 구분하기 위한 방법이 필요함 ㅠ (Type enum사용?)
+        사용이 적은 isLike를 내부 함수로 처리 ( whereIsLike() 함수 따로 생성 )
+
+내부 처리했을 때 Service code 예시
+    SelectProjectList
+        .builder(userId)
+        .leftJoin(
+            QProjectTagEntity.class, "project_tag",
+            QProjectEntity.class,
+            (project, projectTag)-> projectTag.project.id.eq(project.id),
+            true
+        )
+        .where(QProjectTagEntity.class, (tag)->tag.id.in(tagIds)
+        .fetch();
+select 부분이 충분히 repo class로 분리 될만 하고(책임) 내부 처리 했을 때 사용법이 생각보다 더럽다
+때문에 외부 처리로 결정한다.
+
+결론
+    1. from절의 entity값은 외부 처리한다
+    2. leftjoin, where, order by에 꼭 파라미터가 없을 수도 있다
+        SingleArgInterface, NoArgInterface 따로 함수 2개씩 구현
+        null값을 받아서 내부 처리 시도 (null값을 받으면 그냥 null값 건네줌, 외부에서는 그냥 무시함)
+
+다 구현하고 한가지 문제를 더 찾았게 되었다
+    외부에서 order by를 작성 할 때 dto.OrderType에 따라 필요한 QEntity값이 바뀐다 (이전에는 sub query였기 때문에 모두 QProjectEntity로 처리했었음)
+        order by createdAt : QProjectEntity 필요
+        order by like Count : QProjectLikeEntity 필요
+    방법
+    1. type에 따라 분기를 잡는다 (외부 사용 코드가 더러워진다)
+    2. 필요한 entity를 모두 요청한다 (이거 가능?) 또는 List에 담아 반환
+    3. Order Type에서 T를 결정한다 -> OrderType.getType() 에서 필요한 QEntity의 값을 정하게 한다 ->
+    4. 필요한게 다른 것 마다 함수를 따로 만든다 (dsl에 함수 여러개) : 사실 이게 맞긴 한데 ㅋㅋㅋ
+
+    order by는 첫 refactoring의 근본 이유인 외부에서 구현이 알맞다
