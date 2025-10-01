@@ -20,7 +20,7 @@ public class ProjectListDetailWithFundingDto {
         ProjectListDetailWithFundingDto dto = new  ProjectListDetailWithFundingDto();
         dto.project = projectListDetailDto;
         dto.optionFunding = projectListDetailDto.getProjectEntity().getOptions().stream().map(OptionFundingListDto::of).toList();
-        dto.freeFunding = FreeFundingDto.of(projectListDetailDto.getProjectEntity().getFreeFundings().stream().findFirst().get());
+        dto.freeFunding = FreeFundingDto.of(projectListDetailDto.getProjectEntity().getFreeFundings().stream().findFirst());
         return dto;
     }
 

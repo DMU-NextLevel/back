@@ -59,14 +59,14 @@ public class ProjectEntity extends BasedEntity {
     @Enumerated(EnumType.STRING)
     private ProjectStatus projectStatus;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private List<ProjectTagEntity> tags;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private List<ProjectStoryEntity> stories;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    private List<OptionEntity> options;
+    private Set<OptionEntity> options;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     private Set<FreeFundingEntity> freeFundings;
@@ -83,12 +83,10 @@ public class ProjectEntity extends BasedEntity {
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     private List<ProjectViewEntity> views;
 
-    public void setStories(List<ProjectStoryEntity> imgs) {
-        this.stories = imgs;
-    }
     public void setTags(List<ProjectTagEntity> tags) {
         this.tags = tags;
     }
+    public void setFundingData(ProjectEntity project) {this.freeFundings = project.getFreeFundings();this.options = project.getOptions();}
 
     @Builder
     public ProjectEntity(Long id, UserEntity user, String title, String content,

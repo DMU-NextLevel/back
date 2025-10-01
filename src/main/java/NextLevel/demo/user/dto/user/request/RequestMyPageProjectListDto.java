@@ -18,6 +18,9 @@ public class RequestMyPageProjectListDto {
     private Long userId;
     private Integer page = 0;
     private Long pageCount = 10L; // default 10
+
+    private List<Long> tag;
+
     @NotNull
     private MyPageProjectListType type;
 

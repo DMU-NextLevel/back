@@ -100,3 +100,31 @@ select 부분이 충분히 repo class로 분리 될만 하고(책임) 내부 처
     4. 필요한게 다른 것 마다 함수를 따로 만든다 (dsl에 함수 여러개) : 사실 이게 맞긴 한데 ㅋㅋㅋ
 
     order by는 첫 refactoring의 근본 이유인 외부에서 구현이 알맞다
+
+문제 : total count를 구하는 query에도 외부서 설정한 join table 들이 필요하다 (where절에 어떤 table을 사용하는 지 알수 없음으로)
+  total count의 query는 deatult join table (like, isLike, view)이 필수가 아니지만 where을 외부에서 설정함에 따라 무조건 left join해야하는 문제 발생
+  join entity들을 모두 내부에서 처리한다면 -> 그래도 where을 밖에서 설정함으로 모두 left join이 필요함 (where에 사용한 table이 join 되있지 않으면 error발생함)
+main query 보다는 느리기 떄문에 main query에 집중하고 일단 모두 left join하는 방법 사용한다
+
+아 생각이 짧았다 dto로 가져오는 순간 fetch join된 table들을 영속성으로 가져오지 못한다(생성된 sql select 부분에 fetch된 table들 값이 없음으로)
+  (funding 쪽 table이 모두 n+1로 발생)
+  문제는 batch size도 사용 못한다 내가 펀딩한 펀딩 정보만 가져와야 해서 left join funding on funding.user.id.eq(userId) 형식의 조건을 걸어서 가져올 계획이었음
+1. project entity 조회 query, 다른 col 조회 query 분리하기 (같은 join, where를 처리한 query를 2개 만든다)
+2. service에서 funding 관련 정보만 추가 조회하고 합친다 (funding 조회 api를 따로 만든다) (현재 tag따로 조회하는 방법과 동일하게 적용)
+
+안그래도 느려 터진 main query를 2개나 실행하고, 심지어 한개는 funding table들 까지 fetch join한다면 더 느려질 것이다
+차라리 funding 정보를 따로 가져오고 service에서 함치는 것이 더 나을 듯 하다(project list의 개수는 10개 이하임으로)
+결정 : 모든 funding 정보 분리?
+
+project id, 다른 col
+  project left join tag
+  project left join funding
+
+결국 함칠 거면 다른 sub query col들도 tag 가져올 때 계산하는게 이득아님? -> 같이 못가져옴
+
+query dsl을 도입하고자 하는 사람들에게
+    select에 조회한값 where, order by에 못씀, fetch join 없음(무조건 inner join으로만 처리 가능), 이외 query 더럽게 길어져서 성능 버림 등등 정말 도입만이 기능 구현이 가능하다 아님 도입하지 말자
+    진짜 다 쓸모 없고 조건에 맞는 List<Long> pk값 조회하고 다른 정보들 싹다 sub query 때는게 더 빠름 결론이 진심 ㅈ같다
+
+결론 : project list api는 최대한 left join으로 최적화에 성공했음 때문에 일단 funding 정보는 따로 조회하는 걸로 이번 refactoring을 마무리한다
+ 추후 현 query 조회 속도를 측정하고 main query와 list query를 분리한다

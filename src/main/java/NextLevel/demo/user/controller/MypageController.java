@@ -1,9 +1,10 @@
 package NextLevel.demo.user.controller;
 
 import NextLevel.demo.common.SuccessResponse;
-import NextLevel.demo.project.project.dto.response.ProjectListDetailWithFundingDto;
 import NextLevel.demo.project.project.dto.response.ProjectListWithFundingDto;
+import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.user.dto.user.request.RequestMyPageProjectListDto;
+import NextLevel.demo.user.repository.MyPageProjectListType;
 import NextLevel.demo.user.service.MypageProjectSelectService;
 import NextLevel.demo.util.jwt.JWTUtil;
 import jakarta.validation.Valid;
@@ -22,18 +23,19 @@ public class MypageController {
 
     private final MypageProjectSelectService mypageProjectSelectService;
 
-    // 내가 좋아요한, 내가 최근 조회한 with tag
+    // 내가 좋아요한, 내가 최근 조회한, 내가 펀딩한(with funding) with tag
     @PostMapping("/project")
     public ResponseEntity<?> mypageProjectListSupporter(@RequestBody @Valid RequestMyPageProjectListDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
+
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", mypageProjectSelectService.mypageProjectList(dto)));
     }
 
-    // 내가 펀딩한 펀딩 리스트 with tag (분리 사유 : 반환값에 내 펀딩 정보 또한 같이 반환 필요)
-    @PostMapping("/project/my-funding")
-    public ResponseEntity<?> myFundingProjectList(@RequestBody @Valid RequestMyPageProjectListDto dto) {
+    // 내가 생성한 project list(with funding) (default) // 아니 default는 with funding에서 잘 렌더링 해서 쓰라 그래(이것 때문에 col한개 더 받을수는 없잖아)
+    @PostMapping("/project-withFunding")
+    public ResponseEntity<?> myPageProjectListMaker(@RequestBody @Valid RequestMyPageProjectListDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
-        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", ProjectListWithFundingDto.of(mypageProjectSelectService.mypageProjectList(dto))));
+        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", mypageProjectSelectService.mapageProjectListWithFunding(dto)));
     }
 
 }

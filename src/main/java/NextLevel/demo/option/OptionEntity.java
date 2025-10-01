@@ -43,7 +43,7 @@ public class OptionEntity {
     private ProjectEntity project;
 
     @OneToMany(mappedBy = "option", fetch = FetchType.LAZY)
-    private List<OptionFundingEntity> fundings;
+    private Set<OptionFundingEntity> fundings;
 
     public void update(SaveOptionRequestDto dto) {
         if(dto.getDescription() != null && !dto.getDescription().isEmpty())

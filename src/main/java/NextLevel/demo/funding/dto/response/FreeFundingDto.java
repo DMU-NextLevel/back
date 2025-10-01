@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -25,6 +26,11 @@ public class FreeFundingDto {
         dto.price = freeFunding.getPrice();
         dto.createdAt = freeFunding.getCreatedAt();
         return dto;
+    }
+
+    public static FreeFundingDto of(Optional<FreeFundingEntity> freeFunding) {
+        if(freeFunding == null || freeFunding.isEmpty()) return null;
+        return FreeFundingDto.of(freeFunding.get());
     }
 
 }

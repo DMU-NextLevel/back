@@ -1,21 +1,19 @@
 package NextLevel.demo.project.select;
 
 import NextLevel.demo.funding.repository.FundingDslRepository;
-import NextLevel.demo.img.entity.QImgEntity;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDetailDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.entity.QProjectEntity;
 import NextLevel.demo.project.tag.entity.ProjectTagEntity;
+import NextLevel.demo.project.tag.entity.QTagEntity;
 import NextLevel.demo.project.tag.entity.TagEntity;
 import NextLevel.demo.project.view.QProjectViewEntity;
 import NextLevel.demo.project.tag.entity.QProjectTagEntity;
 import NextLevel.demo.user.entity.QLikeEntity;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -25,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class SelectProjectListDslRepository {
     private final JPAQueryFactory queryFactory;
     private final FundingDslRepository fundingDslRepository;
@@ -38,7 +38,8 @@ public class SelectProjectListDslRepository {
     public Builder builder(Long userId) { return new Builder(queryFactory, userId); }
 
     public class Builder {
-        private JPAQuery<ResponseProjectListDetailDto> query;
+        private JPAQuery<ResponseProjectListDetailDto> mainQuery;
+        private JPAQuery<Long> totalCountQuery;
         private BooleanExpression where = Expressions.TRUE;
         private List<OrderSpecifier> orderBy = new ArrayList<>();
         private long limit;
@@ -51,7 +52,14 @@ public class SelectProjectListDslRepository {
 
         public Builder(JPAQueryFactory queryFactory, Long userId) {
             this.userId = userId;
-            query = queryFactory
+            totalCountQuery = queryFactory.selectOne()
+                    .select(projectEntity.count())
+                    .from(projectEntity)
+                    .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
+                    .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(isLikeEntity.user.id.eq(userId)))
+                    .leftJoin(viewEntity).on(viewEntity.project.id.eq(projectEntity.id));
+
+            mainQuery = queryFactory
                     .select(Projections.constructor(ResponseProjectListDetailDto.class,
                         projectEntity,
                         // completeRate
@@ -61,15 +69,15 @@ public class SelectProjectListDslRepository {
                         // user_count
                         fundingDslRepository.fundingUserCount(projectEntity),
                         // is_like
-                        isLikeEntity.isNotNull(),
+                        isLikeEntity.count(),
                         // view_count
                         viewEntity.count()
                     ))
                     .from(projectEntity)
+                    .leftJoin(projectEntity.titleImg).fetchJoin()
                     .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
                     .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(isLikeEntity.user.id.eq(userId)))
-                    .leftJoin(viewEntity).on(viewEntity.project.id.eq(projectEntity.id))
-                    .leftJoin(projectEntity).on().fetchJoin();
+                    .leftJoin(viewEntity).on(viewEntity.project.id.eq(projectEntity.id));
         }
         public <T extends EntityPathBase,J extends EntityPathBase> Builder leftJoin(
                 T joinEntity,
@@ -77,10 +85,15 @@ public class SelectProjectListDslRepository {
                 boolean isFetch
         ){
             J entity = (J) getEntity(entityClass);
-            if(isFetch)
-                query.leftJoin(joinEntity).on(onFunction.function(entity)).fetchJoin();
+            if(isFetch) {
+                log.info("fetch join" + joinEntity.toString());
+                //mainQuery.leftJoin(joinEntity).on(onFunction.function(entity)).fetchJoin();
+                //mainQuery.join(projectEntity.options).fetchJoin();
+            }
             else
-                query.leftJoin(joinEntity).on(onFunction.function(entity));
+                mainQuery.leftJoin(joinEntity).on(onFunction.function(entity));
+
+            totalCountQuery.leftJoin(joinEntity).on(onFunction.function(entity));
             return this;
         }
         public <T extends EntityPathBase> Builder where(Class<T> entityClass, FunctionInterface<BooleanExpression, T> whereFunction) {
@@ -89,6 +102,9 @@ public class SelectProjectListDslRepository {
         public <T extends EntityPathBase> Builder orderBy(Class<T> entityClass, FunctionInterface<OrderSpecifier, T> whereFunction) {
             orderBy.add(whereFunction.function(getEntity(entityClass))); return this;
         }
+        public void whereIsLike() {
+            where = where.and(isLikeEntity.isNotNull());
+        }
         public Builder limit(long limit, long page) {
             this.limit = limit; this.page = page; return this;
         }
@@ -96,18 +112,22 @@ public class SelectProjectListDslRepository {
             orderBy.add(projectEntity.createdAt.desc());
             //List<ResponseProjectListDetailDto> projectList = selectProjectsWithSingle(userId, where, orderBy.toArray(OrderSpecifier[]::new), limit, page * limit);
             List<ResponseProjectListDetailDto> projectList =
-                    query
+                    mainQuery
                             .where(where)
-                            .orderBy(orderBy.toArray(OrderSpecifier[]::new))
                             .groupBy(projectEntity)
+                            .orderBy(orderBy.toArray(OrderSpecifier[]::new))
                             .limit(limit)
                             .offset(page * limit)
                             .fetch();
-            projectList = setTag(projectList);
-            return new ResponseProjectListDto(projectList, totalCount(where), limit, page);
+
+            setTag(projectList);
+
+            return new ResponseProjectListDto(projectList, totalCountQuery.where(where).fetchOne(), limit, page);
         }
 
         private <T extends EntityPathBase> T getEntity(Class<T> entityClass) {
+            if(entityClass == null)
+                return null;
             if(entityClass.equals(QProjectViewEntity.class))
                 return (T) viewEntity;
             if(entityClass.equals(QLikeEntity.class))
@@ -190,21 +210,26 @@ public class SelectProjectListDslRepository {
     }
 
     private List<ResponseProjectListDetailDto> setTag(List<ResponseProjectListDetailDto> projectList){
-        Map<Long, ProjectEntity> tagMap = new HashMap<Long, ProjectEntity>();
+        Map<Long, ProjectEntity> tagMap = new HashMap<>();
         List<Long> projectIds = projectList.stream().map(projectListDto->projectListDto.getId()).toList();
         QProjectEntity project = new QProjectEntity("projectEntityForTag");
         QProjectTagEntity projectTag = new QProjectTagEntity("projectTagEntityForTag");
+        QTagEntity tag = new QTagEntity("tagEntityForTag");
 
         List<ProjectEntity> projectListWithTag = queryFactory
                 .select(project)
                 .from(project)
-                .leftJoin(projectTag).on(project.id.eq(projectTag.project.id))
+                //.leftJoin(projectTag).on(project.id.eq(projectTag.project.id)).fetchJoin()
+                .leftJoin(project.tags, projectTag).fetchJoin()
+                //.leftJoin(tag).on(tag.id.eq(projectTag.tag.id)).fetchJoin()
+                .leftJoin(projectTag.tag, tag).fetchJoin()
                 .where(project.id.in(projectIds))
                 .fetch();
+
         projectListWithTag.stream().forEach(projectEntity -> tagMap.put(projectEntity.getId(), projectEntity));
 
-        projectList.forEach(projectEntity ->
-                projectEntity.setTags(tagMap.get(projectEntity.getId()).getTags().stream().map(ProjectTagEntity::getTag).map(TagEntity::getName).toList())
+        projectList.forEach(projectListDto ->
+                projectListDto.updateTag(tagMap.get(projectListDto.getProjectEntity().getId()))
         );
         return projectList;
     }

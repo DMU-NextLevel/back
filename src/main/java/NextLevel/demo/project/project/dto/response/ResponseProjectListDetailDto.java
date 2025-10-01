@@ -10,6 +10,8 @@ import NextLevel.demo.img.ImgDto;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.entity.ProjectEntity;
+import NextLevel.demo.project.tag.entity.ProjectTagEntity;
+import NextLevel.demo.project.tag.entity.TagEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,9 +56,9 @@ public class ResponseProjectListDetailDto {
         Double completionRate,
         long likeCount,
         long userCount,
-        long isLiked,
-        long viewCount,
-        LocalDateTime projectViewCreateAt // select distinct 용 column
+        Long isLiked,
+        long viewCount
+        // LocalDateTime projectViewCreateAt // select distinct 용 column
     ) {
         this.id = projectEntity.getId();
         this.title = projectEntity.getTitle();
@@ -74,6 +76,11 @@ public class ResponseProjectListDetailDto {
         this.status = projectEntity.getProjectStatus().name();
 
         this.projectEntity = projectEntity;
+    }
+
+    public void updateTag(ProjectEntity project) {
+        this.projectEntity.setTags(project.getTags());
+        tags = project.getTags().stream().map(ProjectTagEntity::getTag).map(TagEntity::getName).toList();
     }
 
 }
