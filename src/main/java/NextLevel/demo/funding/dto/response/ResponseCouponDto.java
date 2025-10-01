@@ -15,6 +15,8 @@ public class ResponseCouponDto {
     private Long percent;
 
     public static ResponseCouponDto of(CouponEntity couponEntity) {
+        if(couponEntity == null)
+            return null;
         ResponseCouponDto dto = new ResponseCouponDto();
         dto.id = couponEntity.getId();
         dto.name = couponEntity.getName();

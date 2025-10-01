@@ -1,5 +1,6 @@
 package NextLevel.demo.funding.entity;
 
+import NextLevel.demo.BasedEntity;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.user.entity.UserEntity;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class FreeFundingEntity {
+public class FreeFundingEntity extends BasedEntity {
 
     @Id
     @GeneratedValue

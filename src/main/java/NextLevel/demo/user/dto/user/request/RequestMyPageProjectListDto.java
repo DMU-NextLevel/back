@@ -1,6 +1,8 @@
 package NextLevel.demo.user.dto.user.request;
 
+import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.user.repository.MyPageProjectListType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,8 +18,14 @@ public class RequestMyPageProjectListDto {
     private Long userId;
     private Integer page = 0;
     private Long pageCount = 10L; // default 10
+
+    private List<Long> tag;
+
     @NotNull
     private MyPageProjectListType type;
+
+    @JsonProperty(namespace = "status")
+    private ProjectStatus projectStatus;
 
     public long getLimit() {
         return pageCount;
