@@ -58,6 +58,10 @@ dependencies {
 
 	// email
 	implementation("com.sun.mail:javax.mail:1.6.2")
+
+    // test h2 db
+    testImplementation 'com.h2database:h2'
+
 }
 
 tasks.named('test') {

@@ -1,24 +1,20 @@
 package NextLevel.demo.project.project.repository;
 
 import NextLevel.demo.funding.repository.FundingDslRepository;
+import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.dto.request.RequestMainPageProjectListDto;
-import NextLevel.demo.project.project.dto.response.ResponseProjectListDetailDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.QProjectEntity;
 import NextLevel.demo.project.select.SelectProjectListDslRepository;
 import NextLevel.demo.project.tag.entity.QProjectTagEntity;
-import com.querydsl.core.types.OrderSpecifier;
+import NextLevel.demo.project.view.QProjectViewEntity;
+import NextLevel.demo.user.entity.QLikeEntity;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static NextLevel.demo.project.tag.entity.QProjectTagEntity.projectTagEntity;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,13 +24,26 @@ public class ProjectDslRepository {
     private final FundingDslRepository fundingDslRepository;
 
     public ResponseProjectListDto selectProjectDsl(RequestMainPageProjectListDto dto) {
-        ResponseProjectListDto projectList = selectProjectRepository
-                .builder()
-                .where(QProjectEntity.class, (project)->whereSearch(project, dto.getSearch()))
-                .where(QProjectEntity.class, (projectEntity)->whereTag(projectEntity, dto.getTagIds()))
-                .orderBy(QProjectEntity.class, (project)->orderByType(project, ProjectOrderType.getType(dto.getOrder()), dto.getDesc()))
+        QProjectTagEntity projectTagEntity = new QProjectTagEntity("projectTagEntity");
+        SelectProjectListDslRepository.Builder builder = selectProjectRepository
+                .builder(dto.getUserId())
+                .leftJoin(projectTagEntity, QProjectEntity.class, (project)->projectTagEntity.project.id.eq(project.id), false);
+
+        String search = dto.getSearch();
+        if(search != null && !search.isEmpty())
+            builder.where(QProjectEntity.class, (project)->whereSearch(project, dto.getSearch()));
+
+        List<Long> tagIds = dto.getTagIds();
+        if(tagIds != null && !tagIds.isEmpty())
+            builder.where(null, (entity)->projectTagEntity.tag.id.in(dto.getTagIds()));
+
+        builder.where(QProjectEntity.class, (projectEntity) -> projectEntity.projectStatus.in(ProjectStatus.PROGRESS, ProjectStatus.STOPPED));
+
+        orderByType(builder, ProjectOrderType.getType(dto.getOrder()), dto.getDesc());
+
+        ResponseProjectListDto projectList = builder
                 .limit(dto.getLimit(), dto.getPage())
-                .commit(dto.getUserId());
+                .commit();
 
         return projectList;
     }
@@ -46,43 +55,35 @@ public class ProjectDslRepository {
         return Expressions.TRUE;
     }
 
-    private BooleanExpression whereTag(QProjectEntity projectEntity, List<Long> tagIds){
-        if(tagIds != null && !tagIds.isEmpty() && tagIds.get(0) != null) {
-            return JPAExpressions
-                    .select(projectTagEntity.id)
-                    .from(projectTagEntity)
-                    .where(projectTagEntity.project.id.eq(projectEntity.id).and(projectTagEntity.tag.id.in(tagIds)))
-                    .exists();
-        }
-        return Expressions.TRUE;
-    }
-
-    private OrderSpecifier<?> orderByType(QProjectEntity projectEntity, ProjectOrderType type, Boolean desc) {
-        ComparableExpressionBase<?> order = projectEntity.createdAt;
+    private void orderByType(SelectProjectListDslRepository.Builder builder, ProjectOrderType type, Boolean desc) {
         switch(type) {
             case ProjectOrderType.CREATED:
-                order = projectEntity.createdAt;
-                break;
+                builder.orderBy(QProjectEntity.class, (project)-> desc?project.createdAt.desc():project.createdAt.asc());
+                return;
             case ProjectOrderType.RECOMMEND:
-                order = Expressions.asNumber(selectProjectRepository.likeCount(projectEntity));
-                break;
+                builder.orderBy(QLikeEntity.class, (like)->desc?like.count().desc():like.count().asc());
+                return;
             case ProjectOrderType.EXPIRED:
-                order = projectEntity.expired;
-                break;
-            case ProjectOrderType.USER:
-                order = Expressions.asNumber(fundingDslRepository.fundingUserCount(projectEntity));
-                break;
+                builder.orderBy(QProjectEntity.class, (project)->desc?project.expiredAt.desc():project.expiredAt.asc());
+                return;
+            case ProjectOrderType.USER: // 펀딩 수 -> sub query 사용
+                builder.orderBy(QProjectEntity.class, (project)->
+                        desc?
+                                Expressions.asNumber(fundingDslRepository.fundingUserCount(project)).desc():
+                                Expressions.asNumber(fundingDslRepository.fundingUserCount(project)).asc()
+                );
+                return;
             case ProjectOrderType.VIEW:
-                order = Expressions.asNumber(selectProjectRepository.viewCount(projectEntity));
-                break;
+                builder.orderBy(QProjectViewEntity.class, (view)->desc?view.count().desc():view.count().asc());
+                return;
             case ProjectOrderType.COMPLETION:
-                order = Expressions.asNumber(fundingDslRepository.completeRate(projectEntity));
-                break;
+                builder.orderBy(QProjectEntity.class, (project)->
+                        desc?
+                            Expressions.asNumber(fundingDslRepository.completeRate(project)).desc():
+                                Expressions.asNumber(fundingDslRepository.completeRate(project)).asc()
+                );
+                return;
         }
-        if(desc == null || desc)
-            return order.desc();
-        else
-            return order.asc();
     }
 
 }

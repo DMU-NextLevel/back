@@ -1,23 +1,30 @@
 package NextLevel.demo.project.project.repository;
 
+import NextLevel.demo.project.project.entity.QProjectEntity;
+import NextLevel.demo.project.view.QProjectViewEntity;
+import NextLevel.demo.user.entity.QLikeEntity;
+import com.querydsl.core.types.dsl.EntityPathBase;
+
 import java.util.Arrays;
 
 public enum ProjectOrderType {
-    RECOMMEND(" like_count "),
-    COMPLETION(" completion_rate "),
-    USER(" user_count "),
-    CREATED(" fp.created_at ") ,
-    EXPIRED(" fp.expired "),
-    VIEW(" view_count ")
+    RECOMMEND(), // like 횟수
+    COMPLETION(),
+    USER(), // 펀딩 횟수
+    CREATED() ,
+    EXPIRED(),
+    VIEW()
     ;
 
-    public String type;
+//    public Class<? extends EntityPathBase> type;
+//
+//    <T extends EntityPathBase> ProjectOrderType (Class<T> type) {
+//        this.type = type;
+//    }
 
-    ProjectOrderType(String type) {
-        this.type = type;
+    public static <T> ProjectOrderType getType(String typeName) {
+        ProjectOrderType type = Arrays.stream(ProjectOrderType.values()).filter(t -> t.name().equals(typeName)).findFirst().orElse(ProjectOrderType.RECOMMEND);
+        return type;
     }
 
-    public static ProjectOrderType getType(String type) {
-        return Arrays.stream(ProjectOrderType.values()).filter(t -> t.name().equals(type)).findFirst().orElse(ProjectOrderType.RECOMMEND);
-    }
 }

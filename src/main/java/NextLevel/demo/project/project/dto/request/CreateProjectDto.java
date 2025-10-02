@@ -1,17 +1,14 @@
 package NextLevel.demo.project.project.dto.request;
 
-import NextLevel.demo.exception.CustomException;
-import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.project.project.entity.ProjectEntity;
-import NextLevel.demo.project.story.entity.ProjectStoryEntity;
-import NextLevel.demo.project.tag.entity.ProjectTagEntity;
 import NextLevel.demo.user.entity.UserEntity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
+import NextLevel.demo.util.StringUtil;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -33,9 +30,11 @@ public class CreateProjectDto {
     @NotEmpty
     private String content;
     @NotEmpty
-    private String expired;
+    private String expiredAt;
     @NotNull
     private Long goal;
+
+    private String startAt; // 시작일 default today
 
     private List<Long> tags = new ArrayList<>();
 
@@ -44,19 +43,16 @@ public class CreateProjectDto {
     private List<MultipartFile> imgs = new ArrayList<>();
 
     public ProjectEntity toProjectEntity(UserEntity user, ImgEntity titleImg) {
-        try {
-            return ProjectEntity.builder()
+        return ProjectEntity.builder()
                 .id(id)
                 .user(user)
                 .title(title)
                 .content(content)
                 .titleImg(titleImg)
-                .expired(expired)
+                .expiredAt(StringUtil.toLocalDate(expiredAt))
+                .startAt(startAt !=null?StringUtil.toLocalDate(startAt):LocalDate.now())
                 .goal(goal)
                 .build();
-        }catch (Exception e) {
-            e.printStackTrace();
-            throw new CustomException(ErrorCode.ERROR_EXPIRED_DATE_CONVERSION, expired);
-        }
     }
+
 }

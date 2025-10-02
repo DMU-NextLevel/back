@@ -20,7 +20,7 @@ public class OptionController {
 
     @GetMapping("/public/option/{projectId}")
     public ResponseEntity<?> getAllOptions(@PathVariable("projectId") Long projectId) {
-        List<ResponseOptionDto> dtos = optionService.getAllOptions(projectId);
+        List<OptionDto> dtos = optionService.getAllOptions(projectId);
         return ResponseEntity.ok().body(new SuccessResponse("success", dtos));
     }
 

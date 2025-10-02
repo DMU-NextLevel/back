@@ -48,6 +48,7 @@ public class UserEntity extends BasedEntity {
     @Column
     private String areaNumber;
 
+    // Enumerated(EnumType.STRING) 추후 수정
     @Column(length=5, columnDefinition = "char(6)")
     private String role = UserRole.SOCIAL.name();
 

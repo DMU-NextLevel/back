@@ -91,6 +91,13 @@ public class FundingService {
         user.updatePoint(-totalPrice);
     }
 
+    // 분리 필요!!
+    // 이미 option1을 구매하면서 coupon1을 사용 -> 이후 option1을 추가 구매 (with other coupon) => error (coupon <> option 1대 1이여야 함!)
+    // 아니면 언제나 새로운 결제 정보를 db에 저장한다! (이게 좀 더 맞는듯, 갯수 col지우고)
+    private void updateOptionFunding() {
+
+    }
+
     @Transactional
     public void freeFunding(@Valid RequestFreeFundingDto dto) {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
