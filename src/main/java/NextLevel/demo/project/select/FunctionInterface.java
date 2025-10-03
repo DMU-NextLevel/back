@@ -1,5 +1,9 @@
 package NextLevel.demo.project.select;
+import com.querydsl.core.types.dsl.EntityPathBase;
 
-public interface FunctionInterface <RT,T> {
-    RT function(T t);
+@FunctionalInterface
+public interface FunctionInterface<RT, T extends EntityPathBase> {
+
+    RT function(T entity);
+
 }

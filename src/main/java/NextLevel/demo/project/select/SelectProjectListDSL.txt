@@ -11,6 +11,7 @@ project :: project dsl repository
 mypage :: project dsl repository
     type : 내가 만든, 내가 좋아요한, 내가 펀딩한, 내가 최근 조회한
 
+<<<<<<< Updated upstream
     사용 예시
     List<ProjectListDto> projectList =
         projectSelectRepository
@@ -22,6 +23,16 @@ mypage :: project dsl repository
             .limit(Long)
             .offset(Long)
             .fetch()
+=======
+    구현 목표 (다른 Service별 사용 방법)
+    List<ProjectListDto> list = ProjectSelectListRepos
+        .select()
+        .where(()->{}) // QProjectEntity 외 다른 QEntity까지
+        .oderBy(()->{}) // default project.createdAt desc
+        .limit()
+        .offset()
+        .commit()
+>>>>>>> Stashed changes
 
     구지 이렇게 까지 만들 필요가 있을까? 과연 확장성에서 올바른가?
     1. 한번 구현해 두면 다양한 service에서 편하게 사용 가능하다.
