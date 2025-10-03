@@ -60,7 +60,7 @@ public class ProjectEntity extends BasedEntity {
     private Long goal;
 
     @Column(nullable = false)
-    private LocalDateTime expired;
+    private LocalDateTime expiredAt;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
     private List<ProjectTagEntity> tags;
@@ -95,8 +95,8 @@ public class ProjectEntity extends BasedEntity {
 
     @Builder
     public ProjectEntity(Long id, UserEntity user, String title, String content,
-        Long goal, ImgEntity titleImg, String expired, List<ProjectTagEntity> tags,
-        List<ProjectStoryEntity> stories) throws ParseException {
+                         Long goal, ImgEntity titleImg, String expiredAt, List<ProjectTagEntity> tags,
+                         List<ProjectStoryEntity> stories) throws ParseException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.id = id;
         this.user = user;
@@ -104,7 +104,7 @@ public class ProjectEntity extends BasedEntity {
         this.content = content;
         this.goal = goal;
         this.titleImg = titleImg;
-        this.expired = LocalDate.parse(expired, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atTime(23, 59); //LocalDateTime.of(new SimpleDateFormat("yyyy-MM-dd").parse(expired));
+        this.expiredAt = LocalDate.parse(expiredAt, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atTime(23, 59); //LocalDateTime.of(new SimpleDateFormat("yyyy-MM-dd").parse(expired));
         this.tags = tags;
         this.stories = stories;
     }

@@ -4,15 +4,13 @@ import NextLevel.demo.funding.FundingUtil;
 import NextLevel.demo.img.ImgDto;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
 
 @Setter
 @Getter
@@ -49,14 +47,14 @@ public class ResponseProjectDetailDto {
         dto.setContent(entity.getContent());
         dto.setTitleImg(new ImgDto(entity.getTitleImg()));
         dto.setCreatedAt(entity.getCreatedAt());
-        dto.setExpiredAt(entity.getExpired());
+        dto.setExpiredAt(entity.getExpiredAt());
         dto.setAuthorNickName(entity.getUser().getNickName());
         dto.setGoal(entity.getGoal());
         dto.setSum(fundingPrice);
         dto.setCompletionRate(FundingUtil.getCompletionRate(dto.sum, dto.goal));
         dto.setLikeCount(entity.getLikes().size());
         dto.setIsAuthor(entity.getUser().getId() == userId);
-        dto.setIsExpired( LocalDateTime.now().isBefore(entity.getExpired()) );
+        dto.setIsExpired( LocalDateTime.now().isBefore(entity.getExpiredAt()) );
         dto.setFundingCount(fundingCount); // 펀딩의 총 갯수
 
         dto.setUserCount(null); // 조회한 조회 수, 아직 추가 예정

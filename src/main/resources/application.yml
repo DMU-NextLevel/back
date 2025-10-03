@@ -153,7 +153,7 @@ spring:
       on-profile: query-test
   jpa:
     hibernate:
-      ddl-auto: validate # 무조건 유지
+      ddl-auto: update # 무조건 유지
     properties:
       hibernate:
         cache.use_second_level_cache: false

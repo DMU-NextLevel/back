@@ -72,7 +72,6 @@ public class MakeTestQuery {
         // String Util.getFormattedNumber -> just return number
         MockedStatic<StringUtil> stringUtilStatic = Mockito.mockStatic(StringUtil.class);
         stringUtilStatic.when(() -> StringUtil.getFormattedNumber(Mockito.anyString(), Mockito.anyString())).thenAnswer(invocation -> invocation.getArgument(0));
-        stringUtilStatic.when(()->StringUtil.toLocalDate(Mockito.anyString())).thenReturn(LocalDate.of(2029, 10, 10));
         MockedStatic<java.nio.file.Files> fileStatic = Mockito.mockStatic(Files.class);
         fileStatic.when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
         fileStatic.when(()->Files.delete(Mockito.any(Path.class))).thenAnswer((Answer<Void>) invocation -> null);
@@ -119,8 +118,7 @@ public class MakeTestQuery {
         CreateProjectDto dto = new CreateProjectDto();
         dto.setUserId(Long.valueOf(count % userCount + 1)); // 0이 포함되면 안됨
         dto.setGoal(Long.valueOf(count % 10 + 1) * 1000); // 1000 ~ 10000 원
-        dto.setStartAt(null); // 오늘로 알아서 처리
-        dto.setExpiredAt("mocked"); // 언젠가...
+        dto.setExpired("2029-10-10"); // 언젠가...
         dto.setContent("content" + count);
         dto.setTitle("title" + count);
         dto.setTitleImg(Mockito.mock(MockMultipartFile.class, "title_img" + count));

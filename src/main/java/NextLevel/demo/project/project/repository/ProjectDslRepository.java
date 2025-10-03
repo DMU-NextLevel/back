@@ -67,7 +67,7 @@ public class ProjectDslRepository {
                 order = Expressions.asNumber(selectProjectRepository.likeCount(projectEntity));
                 break;
             case ProjectOrderType.EXPIRED:
-                order = projectEntity.expired;
+                order = projectEntity.expiredAt;
                 break;
             case ProjectOrderType.USER:
                 order = Expressions.asNumber(fundingDslRepository.fundingUserCount(projectEntity));

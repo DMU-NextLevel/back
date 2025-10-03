@@ -6,7 +6,7 @@ import NextLevel.demo.user.dto.user.request.RequestMyPageProjectListDto;
 import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.user.repository.MyPageProjectListType;
 import NextLevel.demo.user.repository.UserRepository;
-import NextLevel.demo.user.service.MypageProjectSelectService;
+import NextLevel.demo.user.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -37,7 +37,7 @@ public class MyPage {
 
     RequestMyPageProjectListDto dto;
     @Autowired
-    private MypageProjectSelectService mypageProjectSelectService;
+    private UserService userService;
     @Autowired
     private UserRepository userRepository;
 
@@ -46,7 +46,7 @@ public class MyPage {
     Long totalTime = 0L;
 
     @Test
-    // 10/03 :: 26 ms (type = project, img N+1 쿼리 발생, 100개 평균)
+    // 10/03 :: 867ms (type : project, 100개 평균)
     public void select100() {
         userIdList = userRepository.findAll().stream().map(UserEntity::getId).toList();
         selectOne();
@@ -62,7 +62,7 @@ public class MyPage {
         dto = randomDto(userIdList);
         LocalDateTime start = LocalDateTime.now();
 
-        ResponseProjectListDto result = mypageProjectSelectService.mypageProjectList(dto);
+        ResponseProjectListDto result = userService.mypageProjectList(dto);
         long time =Duration.between(start, LocalDateTime.now()).toMillis();
 
         resultList.add(new Result(time, result.getTotalCount(), result.getProjects().size(), result));
@@ -76,7 +76,7 @@ public class MyPage {
         RequestMyPageProjectListDto dto = new RequestMyPageProjectListDto();
         dto.setUserId(userIdList.get(random % userIdList.size()));
 
-        dto.setType(MyPageProjectListType.PROJECT);
+        dto.setType(MyPageProjectListType.FUNDING);
 //        switch(random % 3) {
 //            case 0:
 //                dto.setType(MyPageProjectListType.PROJECT); break;

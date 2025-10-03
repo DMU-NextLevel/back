@@ -11,11 +11,7 @@ import NextLevel.demo.project.tag.entity.TagEntity;
 import NextLevel.demo.project.view.QProjectViewEntity;
 import NextLevel.demo.project.tag.entity.QProjectTagEntity;
 import NextLevel.demo.user.entity.QLikeEntity;
-<<<<<<< HEAD
 import com.querydsl.core.types.Expression;
-=======
-import NextLevel.demo.user.entity.QUserEntity;
->>>>>>> f914d76 (feat query test)
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
@@ -49,7 +45,7 @@ public class SelectProjectListDslRepository {
         private List<OrderSpecifier> orderBy = new ArrayList<>();
         private long limit;
         private long page;
-        
+
         public <T extends EntityPathBase> Builder where(Class<T> entityClass, FunctionInterface<BooleanExpression, T> whereFunction) {
             where = where.and(whereFunction.function(getEntity(entityClass))); return this;
         }
@@ -90,7 +86,7 @@ public class SelectProjectListDslRepository {
                         projectEntity.title,
                         projectEntity.titleImg,
                         projectEntity.createdAt,
-                        projectEntity.expired,
+                        projectEntity.expiredAt,
                         projectEntity.goal,
 
                         // completeRate

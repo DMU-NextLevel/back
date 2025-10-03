@@ -51,7 +51,7 @@ public class CreateProjectDto {
                 .title(title)
                 .content(content)
                 .titleImg(titleImg)
-                .expired(expired)
+                .expiredAt(expired)
                 .goal(goal)
                 .build();
         }catch (Exception e) {
