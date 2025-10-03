@@ -65,6 +65,5 @@ dependencies {
 }
 
 tasks.named('test') {
-    exclude '/java/NextLevel/demo/query/**'
 	useJUnitPlatform()
 }

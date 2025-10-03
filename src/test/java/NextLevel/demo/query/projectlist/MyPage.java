@@ -45,7 +45,7 @@ public class MyPage {
     List<Result> resultList = new ArrayList<>();
     Long totalTime = 0L;
 
-    @Test
+    // @Test
     // 10/03 :: 26 ms (type = project, img N+1 쿼리 발생, 100개 평균)
     public void select100() {
         userIdList = userRepository.findAll().stream().map(UserEntity::getId).toList();
