@@ -56,7 +56,7 @@ public class UserEntity extends BasedEntity {
     @JoinColumn(name = "img_id", nullable = true)
     private ImgEntity img;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private UserDetailEntity userDetail;
 
     @Builder

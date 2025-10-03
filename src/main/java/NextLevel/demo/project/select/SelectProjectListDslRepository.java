@@ -11,6 +11,7 @@ import NextLevel.demo.project.tag.entity.TagEntity;
 import NextLevel.demo.project.view.QProjectViewEntity;
 import NextLevel.demo.project.tag.entity.QProjectTagEntity;
 import NextLevel.demo.user.entity.QLikeEntity;
+import NextLevel.demo.user.entity.QUserEntity;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
@@ -46,6 +47,7 @@ public class SelectProjectListDslRepository {
         private long page;
         private Long userId;
 
+        private QUserEntity userEntity = new QUserEntity("default_user");
         private QLikeEntity likeEntity = new QLikeEntity("default_like");
         private QLikeEntity isLikeEntity = new QLikeEntity("default_is_like");
         private QProjectViewEntity viewEntity = new QProjectViewEntity("default_view");
@@ -74,6 +76,7 @@ public class SelectProjectListDslRepository {
                         viewEntity.count()
                     ))
                     .from(projectEntity)
+                    .leftJoin(projectEntity.user, userEntity).fetchJoin()
                     .leftJoin(projectEntity.titleImg).fetchJoin()
                     .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
                     .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(isLikeEntity.user.id.eq(userId)))

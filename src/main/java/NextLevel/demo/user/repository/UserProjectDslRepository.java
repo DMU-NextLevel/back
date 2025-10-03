@@ -54,10 +54,6 @@ public class UserProjectDslRepository {
     }
 
     private void where(SelectProjectListDslRepository.Builder builder, Long userId, MyPageProjectListType type) {
-        QOptionEntity optionEntity = new QOptionEntity("optionEntity");
-        QOptionFundingEntity optionFundingEntity = new QOptionFundingEntity("optionFundingEntity");
-        QFreeFundingEntity freeFundingEntity = new QFreeFundingEntity("freeFundingEntity");
-
         switch(type) {
             case MyPageProjectListType.PROJECT:
                 builder.where(QProjectEntity.class, (project)->project.user.id.eq(userId));

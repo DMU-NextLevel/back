@@ -153,4 +153,8 @@ spring:
       on-profile: query-test
   jpa:
     hibernate:
-      ddl-auto: create # 무조건 새로 생성함
+      ddl-auto: validate # 무조건 유지
+    properties:
+      hibernate:
+        cache.use_second_level_cache: false
+        cache.use_query_cache: false
