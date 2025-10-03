@@ -1,30 +1,38 @@
 package NextLevel.demo.query.make;
 
 import NextLevel.demo.img.service.ImgServiceImpl;
+import NextLevel.demo.project.project.dto.request.CreateProjectDto;
+import NextLevel.demo.project.project.service.ProjectService;
 import NextLevel.demo.user.dto.RequestUserCreateDto;
-import NextLevel.demo.user.dto.login.RequestEmailLoginDto;
 import NextLevel.demo.user.repository.UserDetailRepository;
 import NextLevel.demo.user.repository.UserRepository;
 import NextLevel.demo.user.service.EmailService;
 import NextLevel.demo.user.service.LoginService;
-import NextLevel.demo.user.service.UserService;
 import NextLevel.demo.user.service.UserValidateService;
+import NextLevel.demo.util.StringUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("query-test")
@@ -32,42 +40,54 @@ import java.util.ArrayList;
 @ExtendWith(MockitoExtension.class)
 public class MakeTestQuery {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserDetailRepository userDetailRepository;
-    @Autowired
-    private UserValidateService userValidateService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @MockitoSpyBean
-    private ImgServiceImpl imgService; // 실제 파일 저장 안함 실제 파일을 작성하는 부분은 함수화 처리해야함 그래야 test하기 편함
-    @Mock
-    private EmailService emailService; // 실제 작동 안함 무조건 true반환
+    private static final int userCount = 100;
+    private static final int projectCount = 1000;
 
-    private LoginService loginService = new LoginService(
-            userRepository,
-            userDetailRepository,
-            emailService,
-            imgService,
-            passwordEncoder,
-            userValidateService
-    );
+    private LoginService loginService;
+    private ProjectService projectService;
 
-    public MakeTestQuery() {
-        Mockito.lenient().when(emailService.checkEmailKey(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-        Mockito.mockStatic(Files.class).when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
-        Mockito.mockStatic(Files.class).when(()->Files.delete(Mockito.any()));
+    public MakeTestQuery(
+            @Autowired UserRepository userRepository,
+            @Autowired UserDetailRepository userDetailRepository,
+            @Autowired PasswordEncoder passwordEncoder,
+            @Autowired UserValidateService userValidateService,
+            @Autowired ImgServiceImpl imgService,
+            @Mock EmailService emailService,
+
+            @Autowired ProjectService projectService
+    ) {
+        loginService = new LoginService(
+                userRepository,
+                userDetailRepository,
+                emailService,
+                imgService,
+                passwordEncoder,
+                userValidateService
+        );
+        this.projectService = projectService;
+        mockInit();
+    }
+
+    private void mockInit() {
+        // String Util.getFormattedNumber -> just return number
+        MockedStatic<StringUtil> stringUtilStatic = Mockito.mockStatic(StringUtil.class);
+        stringUtilStatic.when(() -> StringUtil.getFormattedNumber(Mockito.anyString(), Mockito.anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        stringUtilStatic.when(()->StringUtil.toLocalDate(Mockito.anyString())).thenReturn(LocalDate.of(2029, 10, 10));
+        MockedStatic<java.nio.file.Files> fileStatic = Mockito.mockStatic(Files.class);
+        fileStatic.when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
+        fileStatic.when(()->Files.delete(Mockito.any(Path.class))).thenAnswer((Answer<Void>) invocation -> null);
     }
 
     @Test
+    @Transactional
+    @Rollback(false)
     public void makeUser100() {
-        for(int i = 0; i < 100; i++) {
-            loginService.register(randomDto(i), new ArrayList<>());
+        for(int i = 0; i < userCount; i++) {
+            loginService.register(randomUserDto(i), new ArrayList<>());
         }
     }
 
-    private RequestUserCreateDto randomDto(int count){
+    private RequestUserCreateDto randomUserDto(int count){
         RequestUserCreateDto dto = RequestUserCreateDto
                 .builder()
                 .name("user" + count)
@@ -82,7 +102,39 @@ public class MakeTestQuery {
                 .password("passwrod" + count)
                 .build();
         dto.setKey("key");
-        dto.setImg(new MockMultipartFile("user_img"+count, new byte[]{}));
+        dto.setImg(new MockMultipartFile("user_img"+count, "img".getBytes()));
+        return dto;
+    }
+
+    @Test
+    @Transactional
+    @Rollback(false)
+    public void makeProject1000() {
+        for(int i = 0; i < projectCount; i++) {
+            projectService.save(randomProjectDto(i, userCount) , new ArrayList<>());
+        }
+    }
+
+    private CreateProjectDto randomProjectDto(int count, int userCount) {
+        CreateProjectDto dto = new CreateProjectDto();
+        dto.setUserId(Long.valueOf(count % userCount + 1)); // 0이 포함되면 안됨
+        dto.setGoal(Long.valueOf(count % 10 + 1) * 1000); // 1000 ~ 10000 원
+        dto.setStartAt(null); // 오늘로 알아서 처리
+        dto.setExpiredAt("mocked"); // 언젠가...
+        dto.setContent("content" + count);
+        dto.setTitle("title" + count);
+        dto.setTitleImg(Mockito.mock(MockMultipartFile.class, "title_img" + count));
+        dto.setImgs(List.of(new MultipartFile[]{
+                new MockMultipartFile("project"+count+"_img1"+count, "img".getBytes()),
+                new MockMultipartFile("project"+count+"_img2"+count, "img".getBytes()),
+                new MockMultipartFile("project"+count+"_img3"+count, "img".getBytes())
+        }));
+        dto.setTags(List.of(new Long[] {
+                Long.valueOf(count % 4 + 1),
+                Long.valueOf(count % 4 + 2),
+                Long.valueOf(count % 4 + 3)
+        }));
+        System.out.println(dto.toString());
         return dto;
     }
 
