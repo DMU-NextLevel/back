@@ -50,10 +50,10 @@ public class ProjectCommunityAskService {
     }
 
     @Transactional
-    public ResponseCommunityListDto selectAll(Long projectId) {
+    public List<ProjectCommunityAskEntity> selectAll(Long projectId) {
         ProjectEntity project = projectValidateService.getProjectEntity(projectId);
         List<ProjectCommunityAskEntity> asks = projectCommunityAskRepository.findAllWithAnswerByProjectId(project.getId());
-        return new ResponseCommunityListDto(asks);
+        return projectCommunityAskRepository.findAllByProjectIdOrderByCreatedAt(project.getId());
     }
 
     @Transactional

@@ -46,10 +46,10 @@ public class SelectProjectListDslRepository {
         private long limit;
         private long page;
 
-        public <T extends EntityPathBase> Builder where(Class<T> entityClass, ProjectSelectFunctionInterface<BooleanExpression, T> whereFunction) {
+        public <T extends EntityPathBase> Builder where(Class<T> entityClass, FunctionInterface<BooleanExpression, T> whereFunction) {
             where = where.and(whereFunction.function(getEntity(entityClass))); return this;
         }
-        public <T extends EntityPathBase> Builder orderBy(Class<T> entityClass, ProjectSelectFunctionInterface<OrderSpecifier, T> whereFunction) {
+        public <T extends EntityPathBase> Builder orderBy(Class<T> entityClass, FunctionInterface<OrderSpecifier, T> whereFunction) {
             orderBy.add(whereFunction.function(getEntity(entityClass))); return this;
         }
         public Builder limit(long limit, long page) {

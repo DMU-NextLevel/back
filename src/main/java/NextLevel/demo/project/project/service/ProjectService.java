@@ -7,18 +7,14 @@ import NextLevel.demo.funding.service.FundingValidateService;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.img.service.ImgServiceImpl;
 import NextLevel.demo.img.service.ImgTransaction;
-import NextLevel.demo.project.community.dto.response.ResponseCommunityListDto;
-import NextLevel.demo.project.notice.dto.response.ResponseNoticeListDto;
 import NextLevel.demo.project.project.dto.request.CreateProjectDto;
 import NextLevel.demo.project.project.dto.request.RequestMainPageProjectListDto;
-import NextLevel.demo.project.project.dto.response.ResponseProjectAllDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectDetailDto;
-import NextLevel.demo.project.project.dto.response.ResponseProjectListDetailDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.repository.ProjectDslRepository;
 import NextLevel.demo.project.project.repository.ProjectRepository;
-import NextLevel.demo.project.story.dto.ResponseProjectStoryListDto;
+import NextLevel.demo.project.story.entity.ProjectStoryEntity;
 import NextLevel.demo.project.story.service.ProjectStoryService;
 import NextLevel.demo.project.tag.service.TagService;
 import NextLevel.demo.project.view.ProjectViewService;
@@ -138,22 +134,6 @@ public class ProjectService {
         Long fundingCount = fundingValidateService.getTotalFundingCount(project.getId());
 
         return ResponseProjectDetailDto.of(project, fundingPrice, fundingCount, userId);
-    }
-
-    // notice and community and story
-    // 추가 수정 필요!!! 정렬 어디다 팔아 먹음? 다시 만들것!
-    @Transactional
-    public ResponseProjectAllDto getProjectCommunityAndNoticeAndStoryDto(Long projectId) {
-        ProjectEntity project = projectRepository.findProjectWithNoticesAndCommunityAndStory(projectId).orElseThrow(
-                ()-> new CustomException(ErrorCode.NOT_FOUND,"project")
-        );
-
-        return ResponseProjectAllDto
-                .builder()
-                .community(new ResponseCommunityListDto(project.getCommunities()))
-                .notice(new ResponseNoticeListDto(project.getNotices()))
-                .story(new ResponseProjectStoryListDto(project.getStories()))
-                .build();
     }
 
 }
