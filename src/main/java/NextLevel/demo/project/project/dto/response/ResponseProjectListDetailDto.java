@@ -12,6 +12,8 @@ import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.tag.entity.ProjectTagEntity;
 import NextLevel.demo.project.tag.entity.TagEntity;
+import NextLevel.demo.user.dto.user.response.UserProfileDto;
+import NextLevel.demo.user.dto.user.response.UserSummeryInfoDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +27,8 @@ import lombok.ToString;
 public class ResponseProjectListDetailDto {
     private Long id;
     private String title;
+
+    private UserSummeryInfoDto author;
 
     private ImgDto titleImg;
 
@@ -74,6 +78,8 @@ public class ResponseProjectListDetailDto {
         // this.totalCount = totalCount;
         this.projectViewCreateAt = projectViewCreateAt;
         this.status = projectEntity.getProjectStatus().name();
+
+        author = UserSummeryInfoDto.of(projectEntity.getUser());
 
         this.projectEntity = projectEntity;
     }
