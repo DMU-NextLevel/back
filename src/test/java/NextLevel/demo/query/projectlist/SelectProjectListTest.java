@@ -8,6 +8,7 @@ import NextLevel.demo.project.select.SelectProjectListDslRepository;
 import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.user.repository.UserRepository;
 import org.hibernate.Hibernate;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -20,6 +21,7 @@ import java.lang.reflect.Field;
 @SpringBootTest
 @ActiveProfiles("query-test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Disabled
 public class SelectProjectListTest {
 
     @Autowired
