@@ -38,7 +38,7 @@ public class UserProjectDslRepository {
 
         List<Long> tagIds = dto.getTag();
         if(tagIds != null && !tagIds.isEmpty()){
-            builder.leftJoin(tag, QProjectEntity.class, project->project.id.eq(tag.project.id), false);
+            builder.leftJoin(tag, QProjectEntity.class, project->project.id.eq(tag.project.id));
             builder.where(null, entity->tag.tag.id.in(tagIds));
         }
 
@@ -68,8 +68,7 @@ public class UserProjectDslRepository {
                 builder = builder.leftJoin(
                         view,
                         QProjectEntity.class,
-                        (project)->view.user.id.eq(userId).and(project.id.eq(view.project.id)),
-                        false
+                        (project)->view.user.id.eq(userId).and(project.id.eq(view.project.id))
                 );
                 builder.where(null,entity->view.isNotNull());
                 builder.orderBy(null, entity->view.createAt.max().desc());

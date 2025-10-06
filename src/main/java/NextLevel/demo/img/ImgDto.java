@@ -3,8 +3,10 @@ package NextLevel.demo.img;
 import NextLevel.demo.img.entity.ImgEntity;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter @Setter
+@ToString
 public class ImgDto {
 
     private static final String DEFAULT_IMG_URI = "very_very_long_and_long_default_img.png";

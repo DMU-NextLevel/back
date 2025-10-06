@@ -58,7 +58,7 @@ public class SelectProjectListDslRepository {
                     .select(projectEntity.count())
                     .from(projectEntity)
                     .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
-                    .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(isLikeEntity.user.id.eq(userId)))
+                    .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(userId!=null?isLikeEntity.user.id.eq(userId):Expressions.FALSE))
                     .leftJoin(viewEntity).on(viewEntity.project.id.eq(projectEntity.id));
 
             mainQuery = queryFactory
@@ -79,23 +79,16 @@ public class SelectProjectListDslRepository {
                     .leftJoin(projectEntity.user, userEntity).fetchJoin()
                     .leftJoin(projectEntity.titleImg).fetchJoin()
                     .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
-                    .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(isLikeEntity.user.id.eq(userId)))
+                    .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(userId!=null?isLikeEntity.user.id.eq(userId):Expressions.FALSE))
                     .leftJoin(viewEntity).on(viewEntity.project.id.eq(projectEntity.id));
         }
         public <T extends EntityPathBase,J extends EntityPathBase> Builder leftJoin(
                 T joinEntity,
-                Class<J> entityClass, FunctionInterface<BooleanExpression, J> onFunction,
-                boolean isFetch
+                Class<J> entityClass, FunctionInterface<BooleanExpression, J> onFunction
         ){
             J entity = (J) getEntity(entityClass);
-            if(isFetch) {
-                log.info("fetch join" + joinEntity.toString());
-                //mainQuery.leftJoin(joinEntity).on(onFunction.function(entity)).fetchJoin();
-                //mainQuery.join(projectEntity.options).fetchJoin();
-            }
-            else
-                mainQuery.leftJoin(joinEntity).on(onFunction.function(entity));
 
+            mainQuery.leftJoin(joinEntity).on(onFunction.function(entity));
             totalCountQuery.leftJoin(joinEntity).on(onFunction.function(entity));
             return this;
         }

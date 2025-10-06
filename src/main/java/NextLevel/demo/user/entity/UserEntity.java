@@ -19,6 +19,11 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Entity
 @Table(name = "user")
 @Getter
@@ -52,12 +57,21 @@ public class UserEntity extends BasedEntity {
     @Column(length=5, columnDefinition = "char(6)")
     private String role = UserRole.SOCIAL.name();
 
-    @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, optional = true)
     @JoinColumn(name = "img_id", nullable = true)
     private ImgEntity img;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    private UserDetailEntity userDetail;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<UserDetailEntity> userDetail;
+
+    public UserDetailEntity getUserDetail() {
+        return userDetail.getFirst();
+    }
+
+    public void setUserDetail(UserDetailEntity detailEntity) {
+        userDetail = new ArrayList<>();
+        userDetail.add(detailEntity);
+    }
 
     @Builder
     public UserEntity(Long id, String name,String nickName, int point, String address, String number, String areaNumber, ImgEntity img) {

@@ -27,7 +27,7 @@ public class ProjectDslRepository {
         QProjectTagEntity projectTagEntity = new QProjectTagEntity("projectTagEntity");
         SelectProjectListDslRepository.Builder builder = selectProjectRepository
                 .builder(dto.getUserId())
-                .leftJoin(projectTagEntity, QProjectEntity.class, (project)->projectTagEntity.project.id.eq(project.id), false);
+                .leftJoin(projectTagEntity, QProjectEntity.class, (project)->projectTagEntity.project.id.eq(project.id));
 
         String search = dto.getSearch();
         if(search != null && !search.isEmpty())

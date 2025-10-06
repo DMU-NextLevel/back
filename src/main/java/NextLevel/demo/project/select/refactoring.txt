@@ -128,3 +128,8 @@ query dsl을 도입하고자 하는 사람들에게
 
 결론 : project list api는 최대한 left join으로 최적화에 성공했음 때문에 일단 funding 정보는 따로 조회하는 걸로 이번 refactoring을 마무리한다
  추후 현 query 조회 속도를 측정하고 main query와 list query를 분리한다
+
+추가 수정 left join fetch는 QEntity만으로 부족하다
+    join(projectEntity.projectTag, tagEntity).fetchJoin() 방식이 필요하다
+    문명 QProjectEntity의 연결된 변수들 중 QProjectTagEntity.class와 같은 변수를 찾는다면 찾을 수는 있다
+    하지만 left join중에 더 이상 fetch가 필요한 table이 없음으로 fetch = false 로 고정한다

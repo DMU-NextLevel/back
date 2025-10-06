@@ -43,7 +43,7 @@ public class ProjectEntity extends BasedEntity {
     @Column(nullable = false)
     private String content;
 
-    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.EAGER)
+    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.LAZY) // project list api에서 N+1을 발생 시킴
     @JoinColumn(name = "img_id")
     private ImgEntity titleImg;
 
@@ -112,12 +112,12 @@ public class ProjectEntity extends BasedEntity {
     public String toString() {
         return "ProjectEntity{" +
             "id=" + id +
-            ", user=" + user +
+           // ", user=" + user +
             ", title='" + title + '\'' +
             ", content='" + content + '\'' +
-            ", titleImg=" + titleImg +
+           // ", titleImg=" + titleImg +
             ", tags=" + tags +
-            ", imgs=" + stories +
+           // ", imgs=" + stories +
             '}';
     }
 }

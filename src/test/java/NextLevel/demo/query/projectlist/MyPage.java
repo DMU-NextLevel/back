@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +31,7 @@ import java.util.List;
 @ActiveProfiles("query-test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ExtendWith(MockitoExtension.class)
+@Disabled
 public class MyPage {
 
     @PersistenceContext
@@ -45,7 +47,7 @@ public class MyPage {
     List<Result> resultList = new ArrayList<>();
     Long totalTime = 0L;
 
-    // @Test
+    @Test
     // 10/03 :: 26 ms (type = project, img N+1 쿼리 발생, 100개 평균)
     public void select100() {
         userIdList = userRepository.findAll().stream().map(UserEntity::getId).toList();
