@@ -2,15 +2,22 @@ package NextLevel.demo.social.service;
 
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
+import NextLevel.demo.follow.SelectSocialProfileService;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.img.service.ImgService;
 import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.social.dto.RequestSocialCreateDto;
 import NextLevel.demo.social.dto.ResponseSocialDto;
+import NextLevel.demo.social.dto.SocialLikeDto;
+import NextLevel.demo.social.dto.SocialListDto;
 import NextLevel.demo.social.entity.SocialEntity;
 import NextLevel.demo.social.entity.SocialImgEntity;
+import NextLevel.demo.social.entity.SocialLikeEntity;
 import NextLevel.demo.social.repository.SocialImgRepository;
+import NextLevel.demo.social.repository.SocialLikeRepository;
 import NextLevel.demo.social.repository.SocialRepository;
+import NextLevel.demo.social.repository.IsSelectSocialLikedListInterface;
+import NextLevel.demo.user.dto.user.response.UserSocialProfileDto;
 import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.user.service.UserValidateService;
 import jakarta.persistence.EntityManager;
@@ -20,8 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +41,8 @@ public class SocialService {
     private final SocialImgRepository socialImgRepository;
 
     private final EntityManager entityManager;
+    private final SocialLikeRepository socialLikeRepository;
+    private final SelectSocialProfileService selectSocialProfileService;
 
     @ImgTransaction
     @Transactional
@@ -80,9 +88,48 @@ public class SocialService {
         socialRepository.deleteById(social.getId());
     }
 
-    public List<ResponseSocialDto> list(Long userId) {
-        List<SocialEntity> socials = socialRepository.findAllByUserId(userId);
-        return socials.stream().map(ResponseSocialDto::of).toList();
+    public void socialLike( SocialLikeDto dto) {
+        SocialEntity social = socialRepository.findById(dto.getSocialId()).orElseThrow(
+                ()->{return new CustomException(ErrorCode.NOT_FOUND, "social");}
+        );
+        Optional<SocialLikeEntity> oldLikeOpt = socialLikeRepository.findByUserIdAndSocialId(dto.getUserId(), dto.getSocialId());
+        if(dto.getLike() && oldLikeOpt.isEmpty()) {
+            // 좋야요를 누름
+            socialLikeRepository.save(SocialLikeEntity
+                    .builder()
+                    .user(entityManager.getReference(UserEntity.class, dto.getUserId()))
+                    .social(social)
+                    .build());
+        }
+        if(!dto.getLike() && oldLikeOpt.isPresent()) {
+            // 좋아요 취소
+            socialLikeRepository.delete(oldLikeOpt.get());
+        }
+    }
+
+    public SocialListDto list(Long targetUserId, Long userId) {
+        UserEntity targetUser = userValidateService.findUserWithUserId(targetUserId);
+
+        List<SocialEntity> socialEntityList = socialRepository.findAllByUserId(targetUserId);
+        List<IsSelectSocialLikedListInterface> isSocialLikedList = socialRepository.isSelectSocialLikeList(socialEntityList.stream().map(SocialEntity::getId).toList(), userId);
+
+        Map<Long, IsSelectSocialLikedListInterface> isSocialLikedMap = new HashMap<>();
+        isSocialLikedList.forEach(isLikedInterface->
+                isSocialLikedMap.put(
+                        isLikedInterface.getSocialId(),
+                        isLikedInterface
+                )
+        );
+
+        List<ResponseSocialDto> socials = socialEntityList.stream().map(entity->
+                new ResponseSocialDto(
+                        entity,
+                        isSocialLikedMap.get(entity.getId()).getTotalLikeCount(),
+                        isSocialLikedMap.get(entity.getId()).getMyLikeCount()
+                )).toList();
+
+        UserSocialProfileDto user = selectSocialProfileService.selectUserSocialProfile(targetUser);
+        return SocialListDto.of(user, socials);
     }
 
     private void saveImgs(List<MultipartFile> imgFiles, SocialEntity social, ArrayList<Path> imgPaths) {
