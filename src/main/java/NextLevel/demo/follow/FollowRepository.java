@@ -1,9 +1,11 @@
 package NextLevel.demo.follow;
 
+import NextLevel.demo.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
@@ -17,4 +19,11 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
             "from TagEntity t " +
             "where t.id = 1 ")
     SelectFollowCountAndIsFollowDao selectFollowCountAndFollowDao(@Param("targetUserId") Long targetUserId, @Param("userId") Long userId);
+
+    @Query("select f.user from FollowEntity f left join fetch f.user.img where f.target.id = :targetId")
+    List<UserEntity> gerFollowerList(@Param("targetId") Long targetId);
+
+    @Query("select f.target from FollowEntity f left join fetch f.target.img where f.user.id = :userId")
+    List<UserEntity> gerFollowList(@Param("userId") Long userId);
+
 }

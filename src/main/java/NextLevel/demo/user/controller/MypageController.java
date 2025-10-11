@@ -1,6 +1,7 @@
 package NextLevel.demo.user.controller;
 
 import NextLevel.demo.common.SuccessResponse;
+import NextLevel.demo.follow.FollowService;
 import NextLevel.demo.project.project.dto.response.ProjectListWithFundingDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.user.dto.user.request.RequestMyPageProjectListDto;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class MypageController {
 
     private final MypageProjectSelectService mypageProjectSelectService;
+    private final FollowService followService;
 
     // 내가 좋아요한, 내가 최근 조회한, 내가 펀딩한(with funding) with tag
     @PostMapping("/project")
@@ -36,6 +39,16 @@ public class MypageController {
     public ResponseEntity<?> myPageProjectListMaker(@RequestBody @Valid RequestMyPageProjectListDto dto) {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", mypageProjectSelectService.mapageProjectListWithFunding(dto)));
+    }
+
+    @GetMapping("/follow-list")
+    public ResponseEntity getMyFollowList() {
+        return ResponseEntity.ok().body(new SuccessResponse("success", followService.followList(JWTUtil.getUserIdFromSecurityContext())));
+    }
+
+    @GetMapping("/follower-list")
+    public ResponseEntity getMyFollowerList() {
+        return ResponseEntity.ok().body(new SuccessResponse("success", followService.followerList(JWTUtil.getUserIdFromSecurityContext())));
     }
 
 }
