@@ -13,12 +13,13 @@ public class SelectSocialProfileService {
     private final FollowRepository followRepository;
     private final UserValidateService validateService;
 
-    public UserSocialProfileDto selectUserSocialProfile(long userId) {
-        UserEntity user = validateService.findUserWithUserId(userId);
-        return selectUserSocialProfile(user);
+    public UserSocialProfileDto selectUserSocialProfile(long targetUserId, Long userId) {
+        UserEntity user = validateService.findUserWithUserId(targetUserId);
+        return selectUserSocialProfile(user, userId);
     }
 
-    public UserSocialProfileDto selectUserSocialProfile(UserEntity user) {
-        return UserSocialProfileDto.of(user, followRepository.followCount(user.getId()));
+    public UserSocialProfileDto selectUserSocialProfile(UserEntity targetUser, Long userId) {
+        SelectFollowCountAndIsFollowDao dao = followRepository.selectFollowCountAndFollowDao(targetUser.getId(), userId);
+        return UserSocialProfileDto.of(targetUser, dao.getFollowCount(), dao.getIsFollow());
     }
 }

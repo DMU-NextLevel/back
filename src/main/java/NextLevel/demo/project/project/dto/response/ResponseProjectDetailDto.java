@@ -5,7 +5,12 @@ import NextLevel.demo.img.ImgDto;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import NextLevel.demo.project.tag.entity.ProjectTagEntity;
+import NextLevel.demo.project.tag.entity.TagEntity;
+import NextLevel.demo.user.dto.user.response.UserSocialProfileDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,12 +29,14 @@ public class ResponseProjectDetailDto {
 
     private ImgDto titleImg;
 
+    private UserSocialProfileDto user;
+
+    private List<String> tag;
+
     private LocalDate createdAt;
     private LocalDate startAt;
     private LocalDate expiredAt;
     private String status;
-
-    private String authorNickName;
 
     private Boolean isAuthor;
 
@@ -39,27 +46,43 @@ public class ResponseProjectDetailDto {
 
     private int likeCount;
     private long fundingCount;
-    private Long userCount;
+    private Long viewCount; // 조회수
 
-    public static ResponseProjectDetailDto of(ProjectEntity entity, Long fundingPrice, Long fundingCount, Long userId) {
+    @JsonProperty("isLike")
+    private boolean isLike;
+
+    public static ResponseProjectDetailDto of(
+            ProjectEntity entity,
+            Long fundingPrice,
+            Long fundingCount,
+            Long userId,
+            Long likeCount,
+            Long isLike,
+            Long viewCount,
+            UserSocialProfileDto userSocialProfileDto
+    ) {
         ResponseProjectDetailDto dto = new ResponseProjectDetailDto();
-        dto.setId(entity.getId());
-        dto.setTitle(entity.getTitle());
-        dto.setContent(entity.getContent());
-        dto.setTitleImg(new ImgDto(entity.getTitleImg()));
-        dto.setCreatedAt(entity.getCreatedAt().toLocalDate());
-        dto.setAuthorNickName(entity.getUser().getNickName());
-        dto.setGoal(entity.getGoal());
-        dto.setSum(fundingPrice);
-        dto.setCompletionRate(FundingUtil.getCompletionRate(dto.sum, dto.goal));
-        dto.setLikeCount(entity.getLikes().size());
-        dto.setIsAuthor(entity.getUser().getId().equals(userId));
+        dto.id = entity.getId();
+        dto.title = entity.getTitle();
+        dto.content = entity.getContent();
+        dto.titleImg = new ImgDto(entity.getTitleImg());
+        dto.createdAt = entity.getCreatedAt().toLocalDate();
+        dto.goal = entity.getGoal();
+        dto.sum = fundingPrice;
+        dto.completionRate = FundingUtil.getCompletionRate(dto.sum, dto.goal);
+        dto.likeCount = likeCount!=null?likeCount.intValue():0;
+        dto.isAuthor = entity.getUser().getId().equals(userId);
         dto.status = entity.getProjectStatus().name();
         dto.startAt = entity.getStartAt();
         dto.expiredAt = entity.getExpiredAt();
         dto.setFundingCount(fundingCount); // 펀딩의 총 갯수
 
-        dto.setUserCount(null); // 조회한 조회 수, 아직 추가 예정
+        dto.viewCount = viewCount !=null ? viewCount : 0L; // 조회한 조회 수
+
+        dto.isLike = isLike!=null?isLike.equals(1L):false;
+        dto.user = userSocialProfileDto;
+
+        dto.tag = entity.getTags().stream().map(ProjectTagEntity::getTag).map(TagEntity::getName).toList();
 
         return dto;
     }

@@ -2,6 +2,7 @@ package NextLevel.demo.project.project.service;
 
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
+import NextLevel.demo.follow.SelectSocialProfileService;
 import NextLevel.demo.funding.service.FundingRollbackService;
 import NextLevel.demo.funding.service.FundingValidateService;
 import NextLevel.demo.img.entity.ImgEntity;
@@ -14,9 +15,11 @@ import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.repository.ProjectDslRepository;
 import NextLevel.demo.project.project.repository.ProjectRepository;
+import NextLevel.demo.project.project.repository.SelectProjectDetailDao;
 import NextLevel.demo.project.story.service.ProjectStoryService;
 import NextLevel.demo.project.tag.service.TagService;
 import NextLevel.demo.project.view.ProjectViewService;
+import NextLevel.demo.user.dto.user.response.UserSocialProfileDto;
 import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.user.service.UserValidateService;
 
@@ -46,6 +49,7 @@ public class ProjectService {
     private final ProjectDslRepository projectDslRepository;
     private final FundingRollbackService fundingRollbackService;
     private final ProjectValidateService projectValidateService;
+    private final SelectSocialProfileService selectSocialProfileService;
 
     // 추가
     @ImgTransaction
@@ -132,8 +136,13 @@ public class ProjectService {
         projectViewService.save(project, userId);
         Long fundingPrice = fundingValidateService.getTotalFundingPrice(project.getId());
         Long fundingCount = fundingValidateService.getTotalFundingCount(project.getId());
+        UserSocialProfileDto userSocialProfileDto = selectSocialProfileService.selectUserSocialProfile(project.getUser(), userId);
+        SelectProjectDetailDao dao = projectRepository.selectProjectDetailDao(project.getId(), userId);
 
-        return ResponseProjectDetailDto.of(project, fundingPrice, fundingCount, userId);
+        return ResponseProjectDetailDto.of(
+                project, fundingPrice, fundingCount, userId,
+                dao.getLikeCount(), dao.getIsLike(), dao.getViewCount(),
+                userSocialProfileDto);
     }
 
 }
