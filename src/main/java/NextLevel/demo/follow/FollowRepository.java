@@ -37,10 +37,10 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
             ")" +
                 "follow " +
             "from FollowEntity f " +
-                "left join f.user follow " +
+                "left join f.target follow " +
                 "left join fetch follow.img " +
             "where f.user.id = :userId " +
-            "group by f.user")
+            "group by follow")
     List<ResponseFollowDto> gerFollowList(@Param("userId") Long userId);
 
 }
