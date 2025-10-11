@@ -1,6 +1,7 @@
 package NextLevel.demo.user.controller;
 
 import NextLevel.demo.common.SuccessResponse;
+import NextLevel.demo.follow.FollowService;
 import NextLevel.demo.project.project.dto.response.ProjectListWithFundingDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
 import NextLevel.demo.user.dto.user.request.RequestMyPageProjectListDto;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +39,4 @@ public class MypageController {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", mypageProjectSelectService.mapageProjectListWithFunding(dto)));
     }
-
 }
