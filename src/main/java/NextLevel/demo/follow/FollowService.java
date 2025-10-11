@@ -41,16 +41,14 @@ public class FollowService {
         }
     }
 
-    public List<UserProfileDto> followerList(Long targetUserId) {
+    public List<ResponseFollowDto> followerList(Long targetUserId) {
         userValidateService.findUserWithUserId(targetUserId);
-        List<UserEntity> followerList = followRepository.gerFollowerList(targetUserId);
-        return followerList.stream().map(UserProfileDto::of).toList();
+        return followRepository.gerFollowerList(targetUserId);
     }
 
-    public List<UserProfileDto> followList(Long userId) {
+    public List<ResponseFollowDto> followList(Long userId) {
         userValidateService.findUserWithUserId(userId);
-        List<UserEntity> followList = followRepository.gerFollowList(userId);
-        return followList.stream().map(UserProfileDto::of).toList();
+        return followRepository.gerFollowList(userId);
     }
 
 }

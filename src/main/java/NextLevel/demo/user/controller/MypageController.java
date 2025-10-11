@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class MypageController {
 
     private final MypageProjectSelectService mypageProjectSelectService;
-    private final FollowService followService;
 
     // 내가 좋아요한, 내가 최근 조회한, 내가 펀딩한(with funding) with tag
     @PostMapping("/project")
@@ -40,15 +39,4 @@ public class MypageController {
         dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", mypageProjectSelectService.mapageProjectListWithFunding(dto)));
     }
-
-    @GetMapping("/follow-list")
-    public ResponseEntity getMyFollowList() {
-        return ResponseEntity.ok().body(new SuccessResponse("success", followService.followList(JWTUtil.getUserIdFromSecurityContext())));
-    }
-
-    @GetMapping("/follower-list")
-    public ResponseEntity getMyFollowerList() {
-        return ResponseEntity.ok().body(new SuccessResponse("success", followService.followerList(JWTUtil.getUserIdFromSecurityContext())));
-    }
-
 }
