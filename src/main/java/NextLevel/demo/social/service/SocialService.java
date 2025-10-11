@@ -128,7 +128,7 @@ public class SocialService {
                         isSocialLikedMap.get(entity.getId()).getMyLikeCount()
                 )).toList();
 
-        UserSocialProfileDto user = selectSocialProfileService.selectUserSocialProfile(targetUser);
+        UserSocialProfileDto user = selectSocialProfileService.selectUserSocialProfile(targetUser, userId);
         return SocialListDto.of(user, socials);
     }
 
