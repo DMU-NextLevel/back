@@ -31,7 +31,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
         + "where p.id = :id")
     Optional<ProjectEntity> findProjectDetailById(@Param("id") Long id);
 
-    @Query("select count(my_like) as isLike, count(total_like) as likeCount, count(view) as viewCount " +
+    @Query("select count(distinct my_like) as isLike, count(distinct total_like) as likeCount, count(distinct view) as viewCount " +
             "from ProjectEntity p " +
                 "left join LikeEntity my_like on my_like.project.id = p.id and my_like.user.id = :userId " +
                 "left join LikeEntity total_like on total_like.project.id = p.id " +

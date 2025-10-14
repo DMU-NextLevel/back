@@ -48,7 +48,7 @@ public class FundingDslRepository {
         QCouponEntity coupon = new QCouponEntity("coupon");
 
         BooleanExpression where = project.id.in(projectList.stream().map(ProjectEntity::getId).toList());
-        
+
         List<ProjectEntity> projectListWithOptionFunding = queryFactory
                 .select(project)
                 .from(project)
