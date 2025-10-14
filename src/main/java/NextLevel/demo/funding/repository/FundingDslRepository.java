@@ -4,6 +4,8 @@ import static NextLevel.demo.funding.entity.QFreeFundingEntity.freeFundingEntity
 import static NextLevel.demo.funding.entity.QOptionFundingEntity.optionFundingEntity;
 import static NextLevel.demo.project.project.entity.QProjectEntity.projectEntity;
 
+import NextLevel.demo.exception.CustomException;
+import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.funding.entity.QCouponEntity;
 import NextLevel.demo.funding.entity.QFreeFundingEntity;
 import NextLevel.demo.funding.entity.QOptionFundingEntity;
@@ -46,21 +48,26 @@ public class FundingDslRepository {
         QCouponEntity coupon = new QCouponEntity("coupon");
 
         BooleanExpression where = project.id.in(projectList.stream().map(ProjectEntity::getId).toList());
-        if(userId != null)
-            where = where.and(optionFunding.user.id.eq(userId).or(optionFunding.isNull())).and(freeFunding.user.id.eq(userId).or(freeFunding.isNull()));
-
-        List<ProjectEntity> projectListWithFunding = queryFactory
+        
+        List<ProjectEntity> projectListWithOptionFunding = queryFactory
                 .select(project)
                 .from(project)
                 .leftJoin(project.options, option).fetchJoin()
                 .leftJoin(option.fundings, optionFunding).fetchJoin()
                 .leftJoin(optionFunding.coupon).fetchJoin()
+                .where(where.and(userId!=null?optionFunding.user.id.eq(userId):Expressions.TRUE))
+                .fetch();
+
+        List<ProjectEntity> projectListWithFreeFunding = queryFactory
+                .select(project)
+                .from(project)
                 .leftJoin(project.freeFundings, freeFunding).fetchJoin()
-                .where(where)
+                .where(where.and(userId!=null?freeFunding.user.id.eq(userId):Expressions.TRUE))
                 .fetch();
 
         Map<Long, ProjectEntity> result = new HashMap<>();
-        projectListWithFunding.forEach(p->result.put(p.getId(), p));
+        projectListWithOptionFunding.forEach(p->result.put(p.getId(), p));
+        projectListWithFreeFunding.forEach(p->result.put(p.getId(), p));
 
         projectList.forEach(p->p.setFundingData(result.get(p.getId())));
     }
