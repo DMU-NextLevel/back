@@ -55,7 +55,7 @@ public class SelectProjectListDslRepository {
         public Builder(JPAQueryFactory queryFactory, Long userId) {
             this.userId = userId;
             totalCountQuery = queryFactory.selectOne()
-                    .select(projectEntity.count())
+                    .select(projectEntity.countDistinct())
                     .from(projectEntity)
                     .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
                     .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(userId!=null?isLikeEntity.user.id.eq(userId):Expressions.FALSE))
