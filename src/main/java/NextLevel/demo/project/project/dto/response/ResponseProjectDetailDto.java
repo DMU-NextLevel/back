@@ -71,7 +71,7 @@ public class ResponseProjectDetailDto {
         dto.sum = fundingPrice;
         dto.completionRate = FundingUtil.getCompletionRate(dto.sum, dto.goal);
         dto.likeCount = likeCount!=null?likeCount.intValue():0;
-        dto.isAuthor = entity.getUser().getId().equals(userId);
+        dto.isAuthor = userId != null && entity.getUser().getId().equals(userId);
         dto.status = entity.getProjectStatus().name();
         dto.startAt = entity.getStartAt();
         dto.expiredAt = entity.getExpiredAt();
