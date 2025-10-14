@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 //option funding dto : user funding Info dto, 갯수
 public class OptionFundingDto {
 
+    private Long id;
+
     private UserFundingInfoDto user;
     private ResponseCouponDto coupon;
     private LocalDateTime createdAt;
@@ -23,6 +25,7 @@ public class OptionFundingDto {
 
     public static OptionFundingDto of(OptionFundingEntity optionFunding) {
         OptionFundingDto dto = new OptionFundingDto();
+        dto.id = optionFunding.getId();
         dto.user = UserFundingInfoDto.of(optionFunding.getUser());
         dto.coupon = ResponseCouponDto.of(optionFunding.getCoupon());
         dto.createdAt = optionFunding.getCreatedAt();

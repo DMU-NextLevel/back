@@ -43,25 +43,22 @@ public class FundingService {
 
     @Transactional
     public void cancelFreeFunding(RequestCancelFundingDto dto) {
+        Long projectId = dto.getId();
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
-        FreeFundingEntity funding = freeFundingRepository.findById(dto.getId()).orElseThrow(
+        FreeFundingEntity funding = freeFundingRepository.findByProjectIdAndUserId(projectId, dto.getUserId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "freeFunding");}
         );
-        if(!user.getId().equals(funding.getUser().getId()))
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
 
         fundingRollbackService.rollbackFreeFunding(user, funding);
     }
 
     @Transactional
     public void cancelOptionFunding(RequestCancelFundingDto dto) {
+        Long optionId = dto.getId();
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
-        OptionFundingEntity funding = optionFundingRepository.findById(dto.getId()).orElseThrow(
+        OptionFundingEntity funding = optionFundingRepository.findByOptionIdAndUserId(optionId, dto.getUserId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "optionFunding");}
         );
-
-        if(!user.getId().equals(funding.getUser().getId()))
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
 
         fundingRollbackService.rollbackOptionFunding(user, funding);
     }

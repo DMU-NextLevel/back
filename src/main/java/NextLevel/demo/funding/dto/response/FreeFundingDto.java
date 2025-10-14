@@ -15,6 +15,8 @@ import java.util.Optional;
 @NoArgsConstructor
 public class FreeFundingDto {
 
+    private Long id;
+
     private UserFundingInfoDto user;
     private Long price;
     private LocalDateTime createdAt;
@@ -22,6 +24,7 @@ public class FreeFundingDto {
     public static FreeFundingDto of(FreeFundingEntity freeFunding) {
         if(freeFunding == null) return null;
         FreeFundingDto dto = new FreeFundingDto();
+        dto.id = freeFunding.getId();
         dto.user = UserFundingInfoDto.of(freeFunding.getUser());
         dto.price = freeFunding.getPrice();
         dto.createdAt = freeFunding.getCreatedAt();
