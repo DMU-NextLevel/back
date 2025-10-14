@@ -87,8 +87,10 @@ public class UserEntity extends BasedEntity {
     }
 
     public void checkRole() {
-        if(name != null && !name.isEmpty() && nickName != null && !nickName.isEmpty()
-            && address != null && !address.isEmpty() && number != null && !number.isEmpty())
+        if(name != null && !name.isEmpty() &&
+                nickName != null && !nickName.isEmpty() &&
+                address != null && !address.isEmpty() &&
+                number != null && !number.isEmpty())
             role = UserRole.USER.name();
         else
             role = UserRole.SOCIAL.name();
