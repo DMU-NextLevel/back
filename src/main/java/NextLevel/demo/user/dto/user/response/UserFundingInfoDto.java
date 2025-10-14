@@ -10,6 +10,8 @@ import lombok.Setter;
 @Getter
 public class UserFundingInfoDto {
 
+    private Long id;
+
     private String name;
     private String nickName;
 
@@ -19,6 +21,7 @@ public class UserFundingInfoDto {
 
     public static UserFundingInfoDto of(UserEntity user) {
         UserFundingInfoDto dto = new UserFundingInfoDto();
+        dto.id = user.getId();
         dto.setName(user.getName());
         dto.setNickName(user.getNickName());
         dto.setNumber(user.getNumber());

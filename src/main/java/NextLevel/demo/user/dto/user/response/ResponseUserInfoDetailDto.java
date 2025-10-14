@@ -10,6 +10,8 @@ import lombok.Setter;
 @Setter
 public class ResponseUserInfoDetailDto {
 
+    private Long id;
+
     private String name;
     private String nickName;
     private int point;
@@ -25,19 +27,18 @@ public class ResponseUserInfoDetailDto {
     public static ResponseUserInfoDetailDto of(UserEntity userFullEntity) {
         UserDetailEntity detail = userFullEntity.getUserDetail();
 
-        ResponseUserInfoDetailDto dto = new ResponseUserInfoDetailDto(userFullEntity.getName(), userFullEntity.getNickName(), userFullEntity.getPoint(),
+        ResponseUserInfoDetailDto dto = new ResponseUserInfoDetailDto(userFullEntity.getId(), userFullEntity.getName(), userFullEntity.getNickName(), userFullEntity.getPoint(),
             userFullEntity.getAddress(), userFullEntity.getNumber(), userFullEntity.getAreaNumber(), detail.getEmail(),
             detail.getSocialProvider());
 
-        if(userFullEntity.getImg() != null) {
-            dto.img = new ImgDto(userFullEntity.getImg());
-        }
+        dto.img = new ImgDto(userFullEntity.getImg());
 
         return dto;
     }
 
-    private ResponseUserInfoDetailDto(String name, String nickName, int point, String address,
+    private ResponseUserInfoDetailDto(Long userId, String name, String nickName, int point, String address,
         String number, String areaNumber, String email, String socialProvider) {
+        this.id = userId;
         this.name = name;
         this.nickName = nickName;
         this.point = point;
