@@ -7,11 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-<<<<<<< HEAD
 import java.util.List;
 
-=======
->>>>>>> a0b38d9 (feat summery : summery)
 @Service
 @RequiredArgsConstructor
 public class SummeryService {
@@ -22,20 +19,12 @@ public class SummeryService {
     public TotalSummeryDto projectSummery() {
         Long totalFundingPrice = summeryRepository.getTotalFreeFundingPrice() + summeryRepository.getTotalOptionFundingPrice();
         Long totalFundingCount = summeryRepository.getFreeFundingCount() + summeryRepository.getTotalOptionFundingCount();
-<<<<<<< HEAD
         Long totalSuccessProjectCount = summeryRepository.getProjectCount(List.of(ProjectStatus.SUCCESS));
         Long totalProgressProjectCount = summeryRepository.getProjectCount(List.of(ProjectStatus.PROGRESS));
         Long totalSupporterCount = summeryRepository.getSupporterCount();
         Long totalCreatorCount = summeryRepository.getCreatorCount();
 
         return new TotalSummeryDto(totalFundingPrice, totalFundingCount, totalSuccessProjectCount, totalProgressProjectCount, totalSupporterCount, totalCreatorCount);
-=======
-        Long totalSuccessProjectCount = summeryRepository.getProjectCount(ProjectStatus.SUCCESS);
-        Long totalSupporterCount = summeryRepository.getSupporterCount();
-        Long totalCreatorCount = summeryRepository.getCreatorCount();
-
-        return new TotalSummeryDto(totalFundingPrice, totalFundingCount, totalSuccessProjectCount, totalSupporterCount, totalCreatorCount);
->>>>>>> a0b38d9 (feat summery : summery)
     }
 
 }
