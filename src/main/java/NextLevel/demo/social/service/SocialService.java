@@ -63,7 +63,7 @@ public class SocialService {
         if(!social.getUser().getId().equals(dto.getUserId()))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
 
-        if(dto.getImgs() != null && !dto.getImgs().isEmpty()){
+        if(dto.getImgs() != null && !dto.getImgs().isEmpty() && !dto.getImgs().get(0).isEmpty()){
             deleteImgs(social.getId(), social.getImgs().stream().map(SocialImgEntity::getImg).toList());
             saveImgs(dto.getImgs(), social, imgPaths);
         }
