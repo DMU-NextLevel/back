@@ -12,29 +12,29 @@ import java.util.List;
 public interface SummeryRepository extends Repository<UserEntity, Long> {
 
     @Query("select sum(f.price) from FreeFundingEntity f")
-    long getTotalFreeFundingPrice();
+    Long getTotalFreeFundingPrice();
 
     @Query("select count(f) from FreeFundingEntity f")
-    long getFreeFundingCount();
+    Long getFreeFundingCount();
 
     @Query("select sum(of.count * of.option.price - coalesce(of.coupon.price, 0)) from OptionFundingEntity of")
-    long getTotalOptionFundingPrice();
+    Long getTotalOptionFundingPrice();
 
     @Query("select count(of) from OptionFundingEntity of")
-    long getTotalOptionFundingCount();
+    Long getTotalOptionFundingCount();
 
     @Query("select count(p) from ProjectEntity p where p.projectStatus in :status")
-    long getProjectCount(@Param("status") List<ProjectStatus> status);
+    Long getProjectCount(@Param("status") List<ProjectStatus> status);
 
     @Query("select count(distinct u) from UserEntity u " +
             "left join ProjectEntity p on p.user.id = u.id " +
             "where p.id is not null")
-    long getCreatorCount();
+    Long getCreatorCount();
 
     @Query("select count(distinct u) from UserEntity u " +
             "left join FreeFundingEntity ff on ff.user.id = u.id " +
             "left join OptionFundingEntity of on of.user.id = u.id " +
             "where ff.id is not null or of.id is not null")
-    long getSupporterCount();
+    Long getSupporterCount();
 
 }
