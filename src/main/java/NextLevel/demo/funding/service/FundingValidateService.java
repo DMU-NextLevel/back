@@ -23,7 +23,7 @@ public class FundingValidateService {
 
     public Long getTotalFundingCount(Long projectId) {
         Long optionFundingPrice = optionFundingRepository.getTotalFundingCount(projectId);
-        Long freeFundingPrice = freeFundingRepository.getFundingCount(projectId);
+        Long freeFundingPrice = freeFundingRepository.getFundingCountByProject(projectId);
         return (optionFundingPrice != null ? optionFundingPrice : 0)
                 + (freeFundingPrice != null ? freeFundingPrice : 0);
     }
