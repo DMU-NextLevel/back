@@ -23,7 +23,7 @@ public enum ProjectOrderType {
 //    }
 
     public static <T> ProjectOrderType getType(String typeName) {
-        ProjectOrderType type = Arrays.stream(ProjectOrderType.values()).filter(t -> t.name().equals(typeName)).findFirst().orElse(ProjectOrderType.RECOMMEND);
+        ProjectOrderType type = Arrays.stream(ProjectOrderType.values()).filter(t -> t.name().equals(typeName)).findFirst().orElse(ProjectOrderType.CREATED);
         return type;
     }
 

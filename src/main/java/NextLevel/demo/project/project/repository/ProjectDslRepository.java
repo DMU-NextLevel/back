@@ -47,7 +47,8 @@ public class ProjectDslRepository {
                 }
         );
 
-        orderByType(builder, ProjectOrderType.getType(dto.getOrder()), dto.getDesc());
+        if(dto.getOrder() != null && !dto.getOrder().isEmpty() && dto.getDesc() != null)
+            orderByType(builder, ProjectOrderType.getType(dto.getOrder()), dto.getDesc());
 
         ResponseProjectListDto projectList = builder
                 .limit(dto.getLimit(), dto.getPage())

@@ -31,10 +31,31 @@ public class RequestMainPageProjectListDto {
         return tag;
     }
 
-    public long getLimit() {
+    public Long getLimit() {
         return pageCount;
     }
     public long getOffset() {
+        if(page == null)
+            page = 0;
         return pageCount * page;
     }
+
+    public void setTag(List<Long> tag) {
+        if(tag ==null || tag.isEmpty())
+            return;
+        this.tag = tag;
+    }
+
+    public void setPage(Integer page) {
+        if(page == null)
+            return;
+        this.page = page;
+    }
+
+    public void setPageCount(Long pageCount) {
+        if(pageCount == null)
+            return;
+        this.pageCount = pageCount;
+    }
+
 }

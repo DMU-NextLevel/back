@@ -24,12 +24,12 @@ public class TotalSummeryDto {
             Long totalSupporterCount,
             Long totalCreatorCount
     ) {
-        this.totalFundingPrice = totalFundingPrice;
-        this.totalFundingCount = totalFundingCount;
-        this.totalSuccessProjectCount = totalSuccessProjectCount;
-        this.totalProgressProjectCount = totalProgressProjectCount;
-        this.totalSupporterCount = totalSupporterCount;
-        this.totalCreatorCount = totalCreatorCount;
+        this.totalFundingPrice = totalFundingPrice != null ? totalFundingPrice : 0L;
+        this.totalFundingCount = totalFundingCount !=  null ? totalFundingCount : 0L;
+        this.totalSuccessProjectCount = totalSuccessProjectCount != null ? totalSuccessProjectCount : 0L;
+        this.totalProgressProjectCount = totalProgressProjectCount != null ? totalProgressProjectCount : 0L;
+        this.totalSupporterCount = totalSupporterCount != null ? totalSupporterCount : 0L;
+        this.totalCreatorCount = totalCreatorCount != null ? totalCreatorCount : 0L;
     }
 
 }
