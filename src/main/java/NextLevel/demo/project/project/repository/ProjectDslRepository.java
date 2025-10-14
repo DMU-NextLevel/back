@@ -38,7 +38,14 @@ public class ProjectDslRepository {
             builder.where(null, (entity) -> projectTagEntity.tag.id.in(dto.getTagIds()));
         }
 
-        builder.where(QProjectEntity.class, (projectEntity) -> projectEntity.projectStatus.in(ProjectStatus.PROGRESS, ProjectStatus.STOPPED));
+        builder.where(QProjectEntity.class, (projectEntity) ->
+                {
+                    if(dto.getStatus() == null || dto.getStatus().isEmpty())
+                        return projectEntity.projectStatus.in(ProjectStatus.PROGRESS, ProjectStatus.STOPPED);
+                    else
+                        return projectEntity.projectStatus.in(dto.getStatus());
+                }
+        );
 
         orderByType(builder, ProjectOrderType.getType(dto.getOrder()), dto.getDesc());
 
