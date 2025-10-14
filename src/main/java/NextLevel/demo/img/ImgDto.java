@@ -16,7 +16,8 @@ public class ImgDto {
 
     public ImgDto(ImgEntity imgEntity) {
         if(imgEntity == null) {
-            new ImgDto();
+            id = null;
+            uri = DEFAULT_IMG_URI;
             return;
         }
 
@@ -24,8 +25,4 @@ public class ImgDto {
         this.uri = imgEntity.getUri();
     }
 
-    private ImgDto() {
-        uri = DEFAULT_IMG_URI;
-        id = null;
-    }
 }
