@@ -118,6 +118,8 @@ public class ProjectService {
         UserSocialProfileDto userSocialProfileDto = selectSocialProfileService.selectUserSocialProfile(project.getUser(), userId);
         SelectProjectDetailDao dao = projectRepository.selectProjectDetailDao(project.getId(), userId);
 
+        System.out.println( "project detail userId:" + userId +" , project author id :" + project.getUser().getId() +" equlas:"+project.getUser().getId().equals(userId));
+
         return ResponseProjectDetailDto.of(
                 project, fundingPrice, fundingCount, userId,
                 dao.getLikeCount(), dao.getIsLike(), dao.getViewCount(),
