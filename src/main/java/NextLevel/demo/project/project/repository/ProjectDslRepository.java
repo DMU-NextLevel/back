@@ -26,16 +26,17 @@ public class ProjectDslRepository {
     public ResponseProjectListDto selectProjectDsl(RequestMainPageProjectListDto dto) {
         QProjectTagEntity projectTagEntity = new QProjectTagEntity("projectTagEntity");
         SelectProjectListDslRepository.Builder builder = selectProjectRepository
-                .builder(dto.getUserId())
-                .leftJoin(projectTagEntity, QProjectEntity.class, (project)->projectTagEntity.project.id.eq(project.id));
+                .builder(dto.getUserId());
 
         String search = dto.getSearch();
         if(search != null && !search.isEmpty())
             builder.where(QProjectEntity.class, (project)->whereSearch(project, dto.getSearch()));
 
         List<Long> tagIds = dto.getTagIds();
-        if(tagIds != null && !tagIds.isEmpty())
-            builder.where(null, (entity)->projectTagEntity.tag.id.in(dto.getTagIds()));
+        if(tagIds != null && !tagIds.isEmpty()) {
+            builder.leftJoin(projectTagEntity, QProjectEntity.class, (project)->projectTagEntity.project.id.eq(project.id));
+            builder.where(null, (entity) -> projectTagEntity.tag.id.in(dto.getTagIds()));
+        }
 
         builder.where(QProjectEntity.class, (projectEntity) -> projectEntity.projectStatus.in(ProjectStatus.PROGRESS, ProjectStatus.STOPPED));
 

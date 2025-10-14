@@ -87,6 +87,7 @@ public class ProjectEntity extends BasedEntity {
         this.tags = tags;
     }
     public void setFundingData(ProjectEntity project) {this.freeFundings = project.getFreeFundings();this.options = project.getOptions();}
+    public void updateStatus(ProjectStatus status) { this.projectStatus = status; }
 
     @Builder
     public ProjectEntity(Long id, UserEntity user, String title, String content,

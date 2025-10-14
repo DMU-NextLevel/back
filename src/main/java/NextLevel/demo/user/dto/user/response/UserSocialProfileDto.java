@@ -13,6 +13,8 @@ import lombok.ToString;
 @Setter
 public class UserSocialProfileDto {
 
+    private Long id;
+
     private String name;
     private String nickName;
     private Long followCount;
@@ -22,6 +24,7 @@ public class UserSocialProfileDto {
 
     public static UserSocialProfileDto of(UserEntity user, Long followCount, Long isFollow) {
         UserSocialProfileDto dto = new UserSocialProfileDto();
+        dto.id = user.getId();
         dto.followCount = followCount;
         dto.name = user.getName();
         dto.nickName = user.getNickName();

@@ -69,33 +69,30 @@ public class FundingService {
     @Transactional
     public void optionFunding(@Valid RequestOptionFundingDto dto) {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
-        OptionEntity option = optionValidateService.getOption(dto.getOptionId());
+        OptionEntity option = optionValidateService.getOption(dto.getOptionId()); // option id가 null인 경우
 
-        OptionFundingEntity entity = dto.toEntity(user, option);
+        OptionFundingEntity entity;
+
+        Optional<OptionFundingEntity> oldOptionFundingOpt = optionFundingRepository.findByOptionIdAndUserId(dto.getOptionId(), dto.getUserId());
+        if(oldOptionFundingOpt.isPresent())
+            entity = oldOptionFundingOpt.get();
+        else
+            entity = dto.toEntity(user, option);
 
         // validate price <> option.price * count
         long totalPrice = option.getPrice() * dto.getCount();
         if(dto.getCouponId() != null)
-            totalPrice = couponService.useCoupon(user.getId(), dto.getCouponId(), entity, totalPrice);
+            totalPrice = couponService.useCoupon(user.getId(), dto.getCouponId(), entity, totalPrice); // option update인 경우 이미 coupon을 사용했다면 rollback발생?
 
         if(totalPrice > user.getPoint())
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(totalPrice));
 
-        Optional<OptionFundingEntity> oldOptionFundingOpt = optionFundingRepository.findByOptionIdAndUserId(dto.getOptionId(), dto.getUserId());
-
         if(oldOptionFundingOpt.isPresent())
-            oldOptionFundingOpt.get().updateCount(dto.getCount());
+            entity.updateCount(dto.getCount());
         else
             optionFundingRepository.save(entity);
 
         user.updatePoint(-totalPrice);
-    }
-
-    // 분리 필요!!
-    // 이미 option1을 구매하면서 coupon1을 사용 -> 이후 option1을 추가 구매 (with other coupon) => error (coupon <> option 1대 1이여야 함!)
-    // 아니면 언제나 새로운 결제 정보를 db에 저장한다! (이게 좀 더 맞는듯, 갯수 col지우고)
-    private void updateOptionFunding() {
-
     }
 
     @Transactional

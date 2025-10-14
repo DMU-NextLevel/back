@@ -50,7 +50,7 @@ public class SocialService {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         SocialEntity social = socialRepository.save(dto.toEntity(user));
 
-        saveImgs(dto.getImgs(), social, imgPaths);
+        saveImgs(dto.getImg(), social, imgPaths);
     }
 
     @ImgTransaction
@@ -63,9 +63,9 @@ public class SocialService {
         if(!social.getUser().getId().equals(dto.getUserId()))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
 
-        if(dto.getImgs() != null && !dto.getImgs().isEmpty()){
+        if(dto.getImg() != null && !dto.getImg().isEmpty() && !dto.getImg().get(0).isEmpty()){
             deleteImgs(social.getId(), social.getImgs().stream().map(SocialImgEntity::getImg).toList());
-            saveImgs(dto.getImgs(), social, imgPaths);
+            saveImgs(dto.getImg(), social, imgPaths);
         }
 
         social.update(dto);
