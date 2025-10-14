@@ -29,6 +29,8 @@ public class ResponseProjectListDetailDto {
     private Long id;
     private String title;
 
+    private String content;
+
     private UserSummeryInfoDto author;
 
     private ImgDto titleImg;
@@ -83,6 +85,7 @@ public class ResponseProjectListDetailDto {
         author = UserSummeryInfoDto.of(projectEntity.getUser());
 
         this.projectEntity = projectEntity;
+        this.content = projectEntity.getContent();
     }
 
     public void updateTag(ProjectEntity project) {
