@@ -68,7 +68,7 @@ public class UserProjectDslRepository {
                 builder = builder.leftJoin(
                         view,
                         QProjectEntity.class,
-                        (project)->view.user.id.eq(userId).and(project.id.eq(view.project.id))
+                        (project)->view.user.id.eq(userId).and(project.id.eq(view.project.id)) // 수정 필요 -> 최신의 view만 left join 시킴
                 );
                 builder.where(null,entity->view.isNotNull());
                 builder.orderBy(null, entity->view.createAt.max().desc());
