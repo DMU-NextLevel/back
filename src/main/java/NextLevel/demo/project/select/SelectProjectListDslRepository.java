@@ -67,13 +67,13 @@ public class SelectProjectListDslRepository {
                         // completeRate
                         fundingDslRepository.completeRate(projectEntity),
                         // like count
-                        likeEntity.count(),
+                        likeEntity.countDistinct(),
                         // user_count
                         fundingDslRepository.fundingUserCount(projectEntity),
                         // is_like
-                        isLikeEntity.count(),
+                        isLikeEntity.countDistinct(),
                         // view_count
-                        viewEntity.count()
+                        viewEntity.countDistinct()
                     ))
                     .from(projectEntity)
                     .leftJoin(projectEntity.user, userEntity).fetchJoin()
