@@ -50,7 +50,8 @@ public class SocialService {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         SocialEntity social = socialRepository.save(dto.toEntity(user));
 
-        saveImgs(dto.getImg(), social, imgPaths);
+        if(dto.getImg() != null && !dto.getImg().isEmpty())
+            saveImgs(dto.getImg(), social, imgPaths);
     }
 
     @ImgTransaction
@@ -133,6 +134,8 @@ public class SocialService {
     }
 
     private void saveImgs(List<MultipartFile> imgFiles, SocialEntity social, ArrayList<Path> imgPaths) {
+        if(imgFiles.isEmpty())
+            return;
         imgFiles.forEach(imgFile ->
             socialImgRepository.save(
                     SocialImgEntity
