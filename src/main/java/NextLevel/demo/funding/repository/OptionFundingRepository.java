@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface OptionFundingRepository extends JpaRepository<OptionFundingEntity, Long> {
 
-    @Query("select sum(of.count * of.option.price - coalesce(of.coupon.price, 0)) " +
+    @Query("select sum(of.count * of.option.price) " +
             "from OptionFundingEntity of " +
             "where of.option.project.id = :projectId ")
     Long getTotalPriceByProject(@Param("projectId") Long projectId);
