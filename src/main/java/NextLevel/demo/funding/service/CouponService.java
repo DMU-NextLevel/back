@@ -27,6 +27,16 @@ public class CouponService {
         couponRepository.save(dto.toEntity(user));
     }
 
+    public void addFirstCoupon(UserEntity user) {
+        couponRepository.save(CouponEntity
+                .builder()
+                        .user(user)
+                        .name("첫 회원가입 축하 쿠폰")
+                        .price(1000L)
+                .build()
+        );
+    }
+
     public List<CouponEntity> couponList(long userId) {
         return couponRepository.findByUserIdAndOptionFundingIsNull(userId);
     }

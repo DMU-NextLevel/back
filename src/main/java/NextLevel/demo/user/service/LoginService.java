@@ -1,5 +1,6 @@
 package NextLevel.demo.user.service;
 
+import NextLevel.demo.funding.service.CouponService;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.img.service.ImgServiceImpl;
 import NextLevel.demo.img.service.ImgTransaction;
@@ -36,6 +37,7 @@ public class LoginService {
     @Qualifier("passwordEncoder")
     private final PasswordEncoder passwordEncoder;
     private final UserValidateService userValidateService;
+    private final CouponService couponService;
 
     @Transactional
     public UserDetailEntity socialLogin(RequestUserCreateDto socialLoginDto) {
@@ -57,6 +59,8 @@ public class LoginService {
         }else{
             userDetail = userDetailOptional.get();
         }
+
+        couponService.addFirstCoupon(userDetail.getUser());
 
         return userDetail;
     }
@@ -84,6 +88,8 @@ public class LoginService {
 
         UserEntity user = userRepository.save(dto.toUserEntity());
         UserDetailEntity userDetail = userDetailRepository.save(dto.toUserDetailEntity(user));
+
+        couponService.addFirstCoupon(user);
 
         return userDetail;
     }
