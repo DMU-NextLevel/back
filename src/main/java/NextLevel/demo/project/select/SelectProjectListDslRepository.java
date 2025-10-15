@@ -79,7 +79,7 @@ public class SelectProjectListDslRepository {
                     .leftJoin(projectEntity.user, userEntity).fetchJoin()
                     .leftJoin(projectEntity.titleImg).fetchJoin()
                     .leftJoin(likeEntity).on(likeEntity.project.id.eq(projectEntity.id))
-                    .leftJoin(isLikeEntity).on(likeEntity.project.id.eq(projectEntity.id).and(userId!=null?isLikeEntity.user.id.eq(userId):Expressions.FALSE))
+                    .leftJoin(isLikeEntity).on(isLikeEntity.project.id.eq(projectEntity.id).and(userId!=null?isLikeEntity.user.id.eq(userId):Expressions.FALSE))
                     .leftJoin(viewEntity).on(viewEntity.project.id.eq(projectEntity.id));
         }
         public <T extends EntityPathBase,J extends EntityPathBase> Builder leftJoin(
