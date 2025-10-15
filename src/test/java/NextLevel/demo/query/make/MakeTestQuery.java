@@ -48,96 +48,96 @@ public class MakeTestQuery {
     private LoginService loginService;
     private ProjectService projectService;
 
-    public MakeTestQuery(
-            @Autowired UserRepository userRepository,
-            @Autowired UserDetailRepository userDetailRepository,
-            @Autowired PasswordEncoder passwordEncoder,
-            @Autowired UserValidateService userValidateService,
-            @Autowired ImgServiceImpl imgService,
-            @Mock EmailService emailService,
-
-            @Autowired ProjectService projectService
-    ) {
-        loginService = new LoginService(
-                userRepository,
-                userDetailRepository,
-                emailService,
-                imgService,
-                passwordEncoder,
-                userValidateService
-        );
-        this.projectService = projectService;
-        mockInit();
-    }
-
-    private void mockInit() {
-        // String Util.getFormattedNumber -> just return number
-        MockedStatic<StringUtil> stringUtilStatic = Mockito.mockStatic(StringUtil.class);
-        stringUtilStatic.when(() -> StringUtil.getFormattedNumber(Mockito.anyString(), Mockito.anyString())).thenAnswer(invocation -> invocation.getArgument(0));
-        stringUtilStatic.when(()->StringUtil.toLocalDate(Mockito.anyString())).thenReturn(LocalDate.of(2029, 10, 10));
-        MockedStatic<java.nio.file.Files> fileStatic = Mockito.mockStatic(Files.class);
-        fileStatic.when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
-        fileStatic.when(()->Files.delete(Mockito.any(Path.class))).thenAnswer((Answer<Void>) invocation -> null);
-    }
-
-    @Test
-    @Transactional
-    @Rollback(false)
-    public void makeUser100() {
-        for(int i = 0; i < userCount; i++) {
-            loginService.register(randomUserDto(i), new ArrayList<>());
-        }
-    }
-
-    private RequestUserCreateDto randomUserDto(int count){
-        RequestUserCreateDto dto = RequestUserCreateDto
-                .builder()
-                .name("user" + count)
-                .nickName("nickname" + count)
-
-                .email("email"+count)
-                .address("address" + count)
-
-                .number("number" + count)
-                .areaNumber("areaNumber" + count)
-
-                .password("passwrod" + count)
-                .build();
-        dto.setKey("key");
-        dto.setImg(new MockMultipartFile("user_img"+count, "img".getBytes()));
-        return dto;
-    }
-
-    @Test
-    @Transactional
-    @Rollback(false)
-    public void makeProject1000() {
-        for(int i = 0; i < projectCount; i++) {
-            projectService.save(randomProjectDto(i, userCount) , new ArrayList<>());
-        }
-    }
-
-    private CreateProjectDto randomProjectDto(int count, int userCount) {
-        CreateProjectDto dto = new CreateProjectDto();
-        dto.setUserId(Long.valueOf(count % userCount + 1)); // 0이 포함되면 안됨
-        dto.setGoal(Long.valueOf(count % 10 + 1) * 1000); // 1000 ~ 10000 원
-        dto.setStartAt(null); // 오늘로 알아서 처리
-        dto.setExpiredAt("mocked"); // 언젠가...
-        dto.setContent("content" + count);
-        dto.setTitle("title" + count);
-        dto.setTitleImg(Mockito.mock(MockMultipartFile.class, "title_img" + count));
-        dto.setImgs(List.of(new MultipartFile[]{
-                new MockMultipartFile("project"+count+"_img1"+count, "img".getBytes()),
-                new MockMultipartFile("project"+count+"_img2"+count, "img".getBytes()),
-                new MockMultipartFile("project"+count+"_img3"+count, "img".getBytes())
-        }));
-        dto.setTags(List.of(new Long[] {
-                Long.valueOf(count % 4 + 1),
-                Long.valueOf(count % 4 + 2),
-                Long.valueOf(count % 4 + 3)
-        }));
-        System.out.println(dto.toString());
-        return dto;
-    }
+//    public MakeTestQuery(
+//            @Autowired UserRepository userRepository,
+//            @Autowired UserDetailRepository userDetailRepository,
+//            @Autowired PasswordEncoder passwordEncoder,
+//            @Autowired UserValidateService userValidateService,
+//            @Autowired ImgServiceImpl imgService,
+//            @Mock EmailService emailService,
+//
+//            @Autowired ProjectService projectService
+//    ) {
+//        loginService = new LoginService(
+//                userRepository,
+//                userDetailRepository,
+//                emailService,
+//                imgService,
+//                passwordEncoder,
+//                userValidateService
+//        );
+//        this.projectService = projectService;
+//        mockInit();
+//    }
+//
+//    private void mockInit() {
+//        // String Util.getFormattedNumber -> just return number
+//        MockedStatic<StringUtil> stringUtilStatic = Mockito.mockStatic(StringUtil.class);
+//        stringUtilStatic.when(() -> StringUtil.getFormattedNumber(Mockito.anyString(), Mockito.anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+//        stringUtilStatic.when(()->StringUtil.toLocalDate(Mockito.anyString())).thenReturn(LocalDate.of(2029, 10, 10));
+//        MockedStatic<java.nio.file.Files> fileStatic = Mockito.mockStatic(Files.class);
+//        fileStatic.when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
+//        fileStatic.when(()->Files.delete(Mockito.any(Path.class))).thenAnswer((Answer<Void>) invocation -> null);
+//    }
+//
+//    @Test
+//    @Transactional
+//    @Rollback(false)
+//    public void makeUser100() {
+//        for(int i = 0; i < userCount; i++) {
+//            loginService.register(randomUserDto(i), new ArrayList<>());
+//        }
+//    }
+//
+//    private RequestUserCreateDto randomUserDto(int count){
+//        RequestUserCreateDto dto = RequestUserCreateDto
+//                .builder()
+//                .name("user" + count)
+//                .nickName("nickname" + count)
+//
+//                .email("email"+count)
+//                .address("address" + count)
+//
+//                .number("number" + count)
+//                .areaNumber("areaNumber" + count)
+//
+//                .password("passwrod" + count)
+//                .build();
+//        dto.setKey("key");
+//        dto.setImg(new MockMultipartFile("user_img"+count, "img".getBytes()));
+//        return dto;
+//    }
+//
+//    @Test
+//    @Transactional
+//    @Rollback(false)
+//    public void makeProject1000() {
+//        for(int i = 0; i < projectCount; i++) {
+//            projectService.save(randomProjectDto(i, userCount) , new ArrayList<>());
+//        }
+//    }
+//
+//    private CreateProjectDto randomProjectDto(int count, int userCount) {
+//        CreateProjectDto dto = new CreateProjectDto();
+//        dto.setUserId(Long.valueOf(count % userCount + 1)); // 0이 포함되면 안됨
+//        dto.setGoal(Long.valueOf(count % 10 + 1) * 1000); // 1000 ~ 10000 원
+//        dto.setStartAt(null); // 오늘로 알아서 처리
+//        dto.setExpiredAt("mocked"); // 언젠가...
+//        dto.setContent("content" + count);
+//        dto.setTitle("title" + count);
+//        dto.setTitleImg(Mockito.mock(MockMultipartFile.class, "title_img" + count));
+//        dto.setImgs(List.of(new MultipartFile[]{
+//                new MockMultipartFile("project"+count+"_img1"+count, "img".getBytes()),
+//                new MockMultipartFile("project"+count+"_img2"+count, "img".getBytes()),
+//                new MockMultipartFile("project"+count+"_img3"+count, "img".getBytes())
+//        }));
+//        dto.setTags(List.of(new Long[] {
+//                Long.valueOf(count % 4 + 1),
+//                Long.valueOf(count % 4 + 2),
+//                Long.valueOf(count % 4 + 3)
+//        }));
+//        System.out.println(dto.toString());
+//        return dto;
+//    }
 
 }
