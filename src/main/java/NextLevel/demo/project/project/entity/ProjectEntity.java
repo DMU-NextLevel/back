@@ -89,6 +89,17 @@ public class ProjectEntity extends BasedEntity {
     public void setFundingData(ProjectEntity project) {this.freeFundings = project.getFreeFundings();this.options = project.getOptions();}
     public void updateStatus(ProjectStatus status) { this.projectStatus = status; }
 
+    public void expireProject(Integer totalFundingPrice) {
+        if(this.expiredAt.isAfter(LocalDate.now()))
+            return;
+        if(!this.projectStatus.equals(ProjectStatus.PROGRESS))
+            return;
+        if(this.goal > totalFundingPrice)
+            return;
+
+        this.projectStatus = ProjectStatus.SUCCESS;
+    }
+
     @Builder
     public ProjectEntity(Long id, UserEntity user, String title, String content,
                          Long goal, ImgEntity titleImg, LocalDate expiredAt, LocalDate startAt, List<ProjectTagEntity> tags,

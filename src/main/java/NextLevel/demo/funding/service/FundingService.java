@@ -11,6 +11,7 @@ import NextLevel.demo.funding.entity.OptionFundingEntity;
 import NextLevel.demo.funding.repository.FreeFundingRepository;
 import NextLevel.demo.funding.repository.OptionFundingRepository;
 import NextLevel.demo.option.OptionValidateService;
+import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.service.ProjectValidateService;
 import NextLevel.demo.user.entity.UserEntity;
@@ -66,7 +67,10 @@ public class FundingService {
     @Transactional
     public void optionFunding(@Valid RequestOptionFundingDto dto) {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
-        OptionEntity option = optionValidateService.getOption(dto.getOptionId()); // option id가 null인 경우
+        OptionEntity option = optionValidateService.getOption(dto.getOptionId());
+
+        if(!option.getProject().getProjectStatus().isAvailable())
+            throw new CustomException(ErrorCode.PROJECT_IS_NOT_AVAILABLE);
 
         OptionFundingEntity entity;
 
@@ -97,6 +101,9 @@ public class FundingService {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         ProjectEntity project = projectValidateService.getProjectEntity(dto.getProjectId());
 
+        if(!project.getProjectStatus().isAvailable())
+            throw new CustomException(ErrorCode.PROJECT_IS_NOT_AVAILABLE);
+
         if(dto.getFreePrice() > user.getPoint())
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(dto.getFreePrice()));
 
@@ -109,5 +116,4 @@ public class FundingService {
 
         user.updatePoint(-dto.getFreePrice());
     }
-
 }

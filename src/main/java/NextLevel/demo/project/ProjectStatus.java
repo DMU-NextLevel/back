@@ -8,4 +8,9 @@ public enum ProjectStatus {
     FAIL, // 실패 (만료 기간 넘어감)
     END // 종료
     // DELETED 삭제됨 soft delete
+    ;
+
+    public boolean isAvailable() {
+        return this.equals(ProjectStatus.PROGRESS);
+    }
 }
