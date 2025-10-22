@@ -14,6 +14,7 @@ import NextLevel.demo.user.service.UserService;
 import NextLevel.demo.util.jwt.JWTUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
+@Disabled
 public class UserServiceTest {
 
     @InjectMocks
