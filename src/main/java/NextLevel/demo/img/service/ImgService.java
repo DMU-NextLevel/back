@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface ImgService {
 
-    ImgEntity saveImg(MultipartFile imgFile, ArrayList<Path> imgPaths);
-    ImgEntity updateImg(MultipartFile imgFile, ImgEntity oldImg, ArrayList<Path> imgPaths);
-    void deleteImg(ImgEntity img);
+    ImgEntity saveImg(MultipartFile imgFile, ImgPath imgPath);
+    ImgEntity updateImg(MultipartFile imgFile, ImgEntity oldImg, ImgPath imgPath);
+    void deleteImg(ImgEntity img, ImgPath imgPath);
     ImgEntity saveSocialImg(String imgURL);
     void deleteImgFile(List<Path> filePath) throws IOException ;
 

@@ -4,6 +4,7 @@ import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.follow.SelectSocialProfileService;
 import NextLevel.demo.img.entity.ImgEntity;
+import NextLevel.demo.img.service.ImgPath;
 import NextLevel.demo.img.service.ImgService;
 import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.social.dto.RequestSocialCreateDto;
@@ -46,17 +47,18 @@ public class SocialService {
 
     @ImgTransaction
     @Transactional
-    public void create(RequestSocialCreateDto dto, ArrayList<Path> imgPaths) {
+    public void create(RequestSocialCreateDto dto, ImgPath imgPath) {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         SocialEntity social = socialRepository.save(dto.toEntity(user));
 
         if(dto.getImg() != null && !dto.getImg().isEmpty())
-            saveImgs(dto.getImg(), social, imgPaths);
+            saveImgs(dto.getImg(), social, imgPath);
+
     }
 
     @ImgTransaction
     @Transactional
-    public void update(RequestSocialCreateDto dto, ArrayList<Path> imgPaths) {
+    public void update(RequestSocialCreateDto dto, ImgPath imgPath) {
         SocialEntity social = socialRepository.findById(dto.getId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "social");}
         );
@@ -65,15 +67,16 @@ public class SocialService {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
 
         if(dto.getImg() != null && !dto.getImg().isEmpty() && !dto.getImg().get(0).isEmpty()){
-            deleteImgs(social.getId(), social.getImgs().stream().map(SocialImgEntity::getImg).toList());
-            saveImgs(dto.getImg(), social, imgPaths);
+            deleteImgs(social.getId(), social.getImgs().stream().map(SocialImgEntity::getImg).toList(), imgPath);
+            saveImgs(dto.getImg(), social, imgPath);
         }
 
         social.update(dto);
     }
 
     @Transactional
-    public void delete(Long socialId, Long userId) {
+    @ImgTransaction
+    public void delete(Long socialId, Long userId, ImgPath imgPath) {
         SocialEntity social = socialRepository.findById(socialId).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "social");}
         );
@@ -81,7 +84,7 @@ public class SocialService {
         if(!social.getUser().getId().equals(userId))
             throw new CustomException(ErrorCode.NOT_AUTHOR);
 
-        deleteImgs(socialId, social.getImgs().stream().map(SocialImgEntity::getImg).toList());
+        deleteImgs(socialId, social.getImgs().stream().map(SocialImgEntity::getImg).toList(), imgPath);
 
         entityManager.flush();
         entityManager.clear();
@@ -133,7 +136,7 @@ public class SocialService {
         return SocialListDto.of(user, socials);
     }
 
-    private void saveImgs(List<MultipartFile> imgFiles, SocialEntity social, ArrayList<Path> imgPaths) {
+    private void saveImgs(List<MultipartFile> imgFiles, SocialEntity social, ImgPath imgPath) {
         if(imgFiles.isEmpty())
             return;
         imgFiles.forEach(imgFile ->
@@ -141,15 +144,15 @@ public class SocialService {
                     SocialImgEntity
                             .builder()
                             .social(social)
-                            .img(imgService.saveImg(imgFile, imgPaths))
+                            .img(imgService.saveImg(imgFile, imgPath))
                             .build()
             )
         );
     }
 
-    private void deleteImgs(Long socialId, List<ImgEntity> imgs) {
+    private void deleteImgs(Long socialId, List<ImgEntity> imgs, ImgPath imgPath) {
         socialImgRepository.deleteAllBySocialId(socialId);
-        imgs.forEach(img->imgService.deleteImg(img));
+        imgs.forEach(img->imgService.deleteImg(img, imgPath));
     }
 
 }
