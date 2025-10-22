@@ -21,6 +21,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -120,11 +121,16 @@ public class UserEntity extends BasedEntity {
             throw new CustomException(ErrorCode.CAN_NOT_CHANGE_EMAIL);
 
         try{
-            Field field = UserEntity.class.getDeclaredField(name);
-            field.set(this, value);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+            java.lang.reflect.Method method = UserEntity.class.getDeclaredMethod(StringUtil.setGetterName(name));
+            method.invoke(this, value);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
             e.printStackTrace();
             throw new CustomException(ErrorCode.CAN_NOT_INVOKE, name);
+        } catch (InvocationTargetException e) {
+            if(e.getTargetException() instanceof CustomException)
+                throw (CustomException) e.getTargetException();
+            else
+                throw new CustomException(ErrorCode.SIBAL_WHAT_IS_IT, e.getTargetException().getMessage());
         }
 
         checkRole();

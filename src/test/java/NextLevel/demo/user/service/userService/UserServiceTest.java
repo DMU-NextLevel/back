@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-@Disabled
+// @Disabled
 public class UserServiceTest {
 
     @InjectMocks
