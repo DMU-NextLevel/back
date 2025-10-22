@@ -79,6 +79,10 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
             user-name-attribute: id  # Google의 사용자 식별자 (고유 ID)
 
+  batch:
+    jdbc:
+      initialize-schema: always
+
 
 jwt:
   secret: ${JWT_SECRET}
