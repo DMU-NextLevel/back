@@ -1,0 +1,21 @@
+project 별 funding 정보 dto : my page 메이커
+project dto : project total funding dto
+    project funding dto (기본 정보)
+    option funding list dto : input ( OptionEntity(with List<OptionFundingEntity (with UserEntity) > ) ) + option 정렬, option funding 날짜 정렬
+        option dto
+        List<option funding dto>
+    List<free funding dto>
+
+project funding dto : project 기본 funding 정보 (총 금액, 총 펀딩 수, ... )
+option funding list dto : { option dto, List<option funding dto> }
+option dto : option 정보, 금액
+option funding dto : user funding Info dto, coupon dto, 금액, 날짜, 갯수
+free funding dto : user funding Info, 금액, 날짜
+
+project list with my funding 정보 dto : my page 서포터 (내가 한 펀딩 리스트)
+project list dto : project list with funding dto
+    project list detail dto
+    List<option funding list dto>
+        option dto,
+        option funding dto
+    free funding dto

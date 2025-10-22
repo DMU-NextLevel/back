@@ -17,7 +17,7 @@ public interface UserDetailRepository extends JpaRepository<UserDetailEntity, Lo
 
     Optional<UserDetailEntity> findByEmail(String email);
 
-    @Query("update UserDetailEntity u set u.password = :password where u.userId = :userId")
+    @Query("update UserDetailEntity u set u.password = :password where u.user.id = :userId")
     @Modifying
     void updatePasswordByUserId(@Param("password") String password, @Param("userId") Long userId);
 }

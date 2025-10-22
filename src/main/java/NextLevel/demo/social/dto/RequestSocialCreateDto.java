@@ -1,7 +1,6 @@
 package NextLevel.demo.social.dto;
 
 import NextLevel.demo.social.entity.SocialEntity;
-import NextLevel.demo.social.entity.SocialImgEntity;
 import NextLevel.demo.user.entity.UserEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,7 @@ public class RequestSocialCreateDto {
 
     private Long id;
     private String text;
-    private List<MultipartFile> imgs;
+    private List<MultipartFile> img;
 
     private Long userId;
 

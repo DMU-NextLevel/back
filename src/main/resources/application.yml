@@ -139,8 +139,34 @@ spring:
       hibernate:
         show_sql: true
     hibernate:
-<<<<<<< Updated upstream
-      ddl-auto: create-drop
-=======
       ddl-auto: update
->>>>>>> Stashed changes
+
+---
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_URL}_test
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  config:
+    activate:
+      on-profile: query-test
+  jpa:
+    hibernate:
+      ddl-auto: update # 무조건 유지
+#      format_sql: true
+#      show_sql: true
+    properties:
+      hibernate:
+        cache.use_second_level_cache: false
+        cache.use_query_cache: false
+#        show_sql: true
+#        format_sql: true
+#    show-sql: true
+#
+#logging:
+#  level:
+#    org.hibernate.SQL: debug
+#    org.hibernate.type.descriptor.sql: trace
+#    org.hibernate.type.descriptor.sql.BasicBinder: trace
+#    org.hibernate.orm.jdbc.bind: trace

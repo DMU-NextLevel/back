@@ -27,6 +27,16 @@ public class CouponService {
         couponRepository.save(dto.toEntity(user));
     }
 
+    public void addFirstCoupon(UserEntity user) {
+        couponRepository.save(CouponEntity
+                .builder()
+                        .user(user)
+                        .name("첫 회원가입 축하 쿠폰")
+                        .price(1000L)
+                .build()
+        );
+    }
+
     public List<CouponEntity> couponList(long userId) {
         return couponRepository.findByUserIdAndOptionFundingIsNull(userId);
     }
@@ -42,6 +52,9 @@ public class CouponService {
 
         if(coupon.getOptionFunding() != null)
             throw new CustomException(ErrorCode.ALREADY_USED_COUPON);
+
+        if(optionFunding.getCoupon() != null)
+            throw new CustomException(ErrorCode.CAN_USE_COUPONS_AT_ONE_OPTION);
 
         price -= coupon.getPrice();
 

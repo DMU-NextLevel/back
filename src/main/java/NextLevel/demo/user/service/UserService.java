@@ -43,7 +43,6 @@ public class UserService {
     @Qualifier("passwordEncoder")
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
-    private final UserProjectDslRepository userProjectDslRepository;
 
     @Transactional
     public UserEntity updateUserInfo(RequestUpdateUserInfoDto dto, HttpServletRequest request, HttpServletResponse response) {
@@ -121,19 +120,6 @@ public class UserService {
         // emailService.sendEmailCode(email, );
 
         user.getUserDetail().setPassword(randomPassword);
-    }
-
-    public ResponseProjectListDto mypageProjectList(@Valid RequestMyPageProjectListDto dto) {
-        ResponseProjectListDto result = userProjectDslRepository.myProject(dto);
-
-        if(dto.getType().equals(MyPageProjectListType.VIEW)){
-            // sort !!
-            Collections.sort(result.getProjects(), (a, b)->{
-                return a.getProjectViewCreateAt().isBefore(b.getProjectViewCreateAt())? 1:-1;
-            });
-        }
-
-        return result;
     }
 
 }

@@ -15,7 +15,7 @@ public interface OptionFundingRepository extends JpaRepository<OptionFundingEnti
     @Query("select sum(f.count * f.option.price) " +
             "from OptionEntity o left join o.fundings f " +
             "where o.project.id = :projectId " +
-            "group by f")
+            "group by o.project")
     Long getTotalPriceByProject(@Param("projectId") Long projectId);
 
     @Query("select sum(of.count) " +

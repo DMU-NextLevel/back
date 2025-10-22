@@ -1,5 +1,7 @@
 package NextLevel.demo.project.project.dto.response;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class ResponseProjectListDto {
     private List<ResponseProjectListDetailDto> projects;
-    private long totalCount; // projects 에 존재함
+    private long totalCount;
     private long pageCount; // page 당 반환 project 갯수
     private long page; // 요청시 들어옴
 
@@ -17,5 +19,15 @@ public class ResponseProjectListDto {
         this.pageCount = pageCount;
         this.page = page;
         this.totalCount = totalCount;
+    }
+
+    @Override
+    public String toString() {
+        return "ResponseProjectListDto{" +
+                "projects=" + Arrays.toString(projects.toArray()) +
+                ", totalCount=" + totalCount +
+                ", pageCount=" + pageCount +
+                ", page=" + page +
+                '}';
     }
 }

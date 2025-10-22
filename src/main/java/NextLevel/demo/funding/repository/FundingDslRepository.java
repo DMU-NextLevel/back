@@ -4,18 +4,30 @@ import static NextLevel.demo.funding.entity.QFreeFundingEntity.freeFundingEntity
 import static NextLevel.demo.funding.entity.QOptionFundingEntity.optionFundingEntity;
 import static NextLevel.demo.project.project.entity.QProjectEntity.projectEntity;
 
+import NextLevel.demo.exception.CustomException;
+import NextLevel.demo.exception.ErrorCode;
+import NextLevel.demo.funding.entity.QCouponEntity;
+import NextLevel.demo.funding.entity.QFreeFundingEntity;
+import NextLevel.demo.funding.entity.QOptionFundingEntity;
+import NextLevel.demo.option.QOptionEntity;
+import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.entity.QProjectEntity;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class FundingDslRepository {
 
     private final JPAQueryFactory queryFactory;
@@ -26,6 +38,38 @@ public class FundingDslRepository {
                 .from(projectEntity)
                 .where(projectEntity.id.eq(projectId))
                 .fetchOne();
+    }
+
+    public void addFundingData(List<ProjectEntity> projectList, Long userId) {
+        QProjectEntity project = new QProjectEntity("project");
+        QOptionEntity option = new QOptionEntity("option");
+        QOptionFundingEntity optionFunding = new QOptionFundingEntity("optionFunding");
+        QFreeFundingEntity freeFunding = new QFreeFundingEntity("freeFunding");
+        QCouponEntity coupon = new QCouponEntity("coupon");
+
+        BooleanExpression where = project.id.in(projectList.stream().map(ProjectEntity::getId).toList());
+
+        List<ProjectEntity> projectListWithOptionFunding = queryFactory
+                .select(project)
+                .from(project)
+                .leftJoin(project.options, option).fetchJoin()
+                .leftJoin(option.fundings, optionFunding).fetchJoin()
+                .leftJoin(optionFunding.coupon).fetchJoin()
+                .where(where.and(userId!=null?optionFunding.user.id.eq(userId):Expressions.TRUE))
+                .fetch();
+
+        List<ProjectEntity> projectListWithFreeFunding = queryFactory
+                .select(project)
+                .from(project)
+                .leftJoin(project.freeFundings, freeFunding).fetchJoin()
+                .where(where.and(userId!=null?freeFunding.user.id.eq(userId):Expressions.TRUE))
+                .fetch();
+
+        Map<Long, ProjectEntity> result = new HashMap<>();
+        projectListWithOptionFunding.forEach(p->result.put(p.getId(), p));
+        projectListWithFreeFunding.forEach(p->result.put(p.getId(), p));
+
+        projectList.forEach(p->p.setFundingData(result.get(p.getId())));
     }
 
     public Expression<Double> completeRate(QProjectEntity projectEntity) {

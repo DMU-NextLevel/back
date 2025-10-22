@@ -30,11 +30,14 @@ public enum ErrorCode {
 
     // project
     NOT_CORRECT_TAG_SIZE(HttpStatus.BAD_REQUEST, "04001","invalidated tag input") ,
-    ERROR_EXPIRED_DATE_CONVERSION(HttpStatus.BAD_REQUEST, "04003","can not convert expired : %s"),
+    ERROR_EXPIRED_DATE_CONVERSION(HttpStatus.BAD_REQUEST, "04003","can not convert date : %s"),
+    START_MUST_BEFORE_EXPIRED(HttpStatus.BAD_REQUEST, "04004","start must be before expired"),
 
     // funding
     NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "05001","not enough point left:%s, need:%s"),
     ALREADY_USED_COUPON(HttpStatus.BAD_REQUEST, "05002","already used coupon"),
+    CAN_USE_COUPONS_AT_ONE_OPTION(HttpStatus.BAD_REQUEST, "05003", "can not user coupons at one option"),
+    PROJECT_IS_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "05004","project is not available"),
 
     // option
 

@@ -48,9 +48,9 @@ public class OptionService {
         optionRepository.deleteById(option.getId());
     }
 
-    public List<ResponseOptionDto> getAllOptions(Long projectId) {
+    public List<OptionDto> getAllOptions(Long projectId) {
         List<OptionEntity> options = optionRepository.findByProjectId(projectId);
-        return options.stream().map(ResponseOptionDto::of).toList();
+        return options.stream().map(OptionDto::of).toList();
     }
 
 }

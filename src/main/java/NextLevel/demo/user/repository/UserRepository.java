@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    @Query("select u from UserEntity u left join fetch UserDetailEntity d on d.userId = u.id where u.id = :userId")
+    @Query("select u from UserEntity u left join fetch u.userDetail left join fetch u.img where u.id = :userId")
     Optional<UserEntity> findUserFullInfoByUserId(@Param("userId")Long userId);
 
     @Query("select u from UserEntity u where u.nickName = :nickName")

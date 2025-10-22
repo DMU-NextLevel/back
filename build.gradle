@@ -60,13 +60,9 @@ dependencies {
 	implementation("com.sun.mail:javax.mail:1.6.2")
 
     // test h2 db
-<<<<<<< Updated upstream
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.h2database:h2'
-=======
-    testImplementation 'com.h2database:h2'
 
->>>>>>> Stashed changes
 }
 
 tasks.named('test') {

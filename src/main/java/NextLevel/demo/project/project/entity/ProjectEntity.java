@@ -1,9 +1,12 @@
 package NextLevel.demo.project.project.entity;
 
 import NextLevel.demo.BasedEntity;
+import NextLevel.demo.exception.CustomException;
+import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.funding.entity.FreeFundingEntity;
 import NextLevel.demo.option.OptionEntity;
 import NextLevel.demo.img.entity.ImgEntity;
+import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.community.entity.ProjectCommunityAskEntity;
 import NextLevel.demo.project.notice.entity.ProjectNoticeEntity;
 import NextLevel.demo.project.story.entity.ProjectStoryEntity;
@@ -11,21 +14,9 @@ import NextLevel.demo.project.tag.entity.ProjectTagEntity;
 import NextLevel.demo.project.view.ProjectViewEntity;
 import NextLevel.demo.user.entity.LikeEntity;
 import NextLevel.demo.user.entity.UserEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import java.text.ParseException;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -52,7 +43,7 @@ public class ProjectEntity extends BasedEntity {
     @Column(nullable = false)
     private String content;
 
-    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.EAGER)
+    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.LAZY) // project list api에서 N+1을 발생 시킴
     @JoinColumn(name = "img_id")
     private ImgEntity titleImg;
 
@@ -60,16 +51,22 @@ public class ProjectEntity extends BasedEntity {
     private Long goal;
 
     @Column(nullable = false)
-    private LocalDateTime expired;
+    private LocalDate expiredAt;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
+    @Column(nullable = false)
+    private LocalDate startAt;
+
+    @Enumerated(EnumType.STRING)
+    private ProjectStatus projectStatus;
+
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private List<ProjectTagEntity> tags;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private List<ProjectStoryEntity> stories;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    private List<OptionEntity> options;
+    private Set<OptionEntity> options;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     private Set<FreeFundingEntity> freeFundings;
@@ -86,39 +83,53 @@ public class ProjectEntity extends BasedEntity {
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     private List<ProjectViewEntity> views;
 
-    public void setStories(List<ProjectStoryEntity> imgs) {
-        this.stories = imgs;
-    }
     public void setTags(List<ProjectTagEntity> tags) {
         this.tags = tags;
+    }
+    public void setFundingData(ProjectEntity project) {this.freeFundings = project.getFreeFundings();this.options = project.getOptions();}
+    public void updateStatus(ProjectStatus status) { this.projectStatus = status; }
+
+    public void expireProject(Integer totalFundingPrice) {
+        if(this.expiredAt.isAfter(LocalDate.now()))
+            return;
+        if(!this.projectStatus.equals(ProjectStatus.PROGRESS))
+            return;
+        if(this.goal > totalFundingPrice)
+            return;
+
+        this.projectStatus = ProjectStatus.SUCCESS;
     }
 
     @Builder
     public ProjectEntity(Long id, UserEntity user, String title, String content,
-        Long goal, ImgEntity titleImg, String expired, List<ProjectTagEntity> tags,
-        List<ProjectStoryEntity> stories) throws ParseException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                         Long goal, ImgEntity titleImg, LocalDate expiredAt, LocalDate startAt, List<ProjectTagEntity> tags,
+                         List<ProjectStoryEntity> stories) {
         this.id = id;
         this.user = user;
         this.title = title;
         this.content = content;
         this.goal = goal;
         this.titleImg = titleImg;
-        this.expired = LocalDate.parse(expired, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atTime(23, 59); //LocalDateTime.of(new SimpleDateFormat("yyyy-MM-dd").parse(expired));
+        this.expiredAt = expiredAt;
+        this.startAt = startAt;
         this.tags = tags;
         this.stories = stories;
+
+        this.projectStatus = startAt.isAfter(LocalDate.now()) ? ProjectStatus.PENDING : ProjectStatus.PROGRESS;
+        if(startAt.isAfter(expiredAt)) // start > expired
+            throw new CustomException(ErrorCode.START_MUST_BEFORE_EXPIRED);
     }
 
     @Override
     public String toString() {
         return "ProjectEntity{" +
             "id=" + id +
-            ", user=" + user +
+           // ", user=" + user +
             ", title='" + title + '\'' +
             ", content='" + content + '\'' +
-            ", titleImg=" + titleImg +
+           // ", titleImg=" + titleImg +
             ", tags=" + tags +
-            ", imgs=" + stories +
+           // ", imgs=" + stories +
             '}';
     }
 }

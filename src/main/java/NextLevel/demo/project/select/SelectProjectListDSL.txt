@@ -11,15 +11,28 @@ project :: project dsl repository
 mypage :: project dsl repository
     type : 내가 만든, 내가 좋아요한, 내가 펀딩한, 내가 최근 조회한
 
-사용 방법
-    select project list dsl repository
+<<<<<<< Updated upstream
+    사용 예시
+    List<ProjectListDto> projectList =
+        projectSelectRepository
+            .builder()
+            .where(QProjectTagEntity.class, (projectTag)->projectTag.id in tagIds)
+            .where(QProjectEntity.class, (project)->project.expired.isBefore(LocalDateTime.now())
+            .orderBy(QProjectEntity, (project)->project.createAt.desc())
+            .orderBy(QProjectLikeEntity.class, (projectLike) -> projectLike.count().desc())
+            .limit(Long)
+            .offset(Long)
+            .fetch()
+=======
+    구현 목표 (다른 Service별 사용 방법)
+    List<ProjectListDto> list = ProjectSelectListRepos
         .select()
-        .join()
-        .where(()->{}) // project 와 다른 거 한개 까지
-        .oderBy(()->{}) // 다른 한개, default project.createdAt desc
+        .where(()->{}) // QProjectEntity 외 다른 QEntity까지
+        .oderBy(()->{}) // default project.createdAt desc
         .limit()
         .offset()
-        .build()
+        .commit()
+>>>>>>> Stashed changes
 
     구지 이렇게 까지 만들 필요가 있을까? 과연 확장성에서 올바른가?
     1. 한번 구현해 두면 다양한 service에서 편하게 사용 가능하다.

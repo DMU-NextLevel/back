@@ -11,6 +11,7 @@ import NextLevel.demo.funding.entity.OptionFundingEntity;
 import NextLevel.demo.funding.repository.FreeFundingRepository;
 import NextLevel.demo.funding.repository.OptionFundingRepository;
 import NextLevel.demo.option.OptionValidateService;
+import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.service.ProjectValidateService;
 import NextLevel.demo.user.entity.UserEntity;
@@ -43,25 +44,22 @@ public class FundingService {
 
     @Transactional
     public void cancelFreeFunding(RequestCancelFundingDto dto) {
+        Long projectId = dto.getId();
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
-        FreeFundingEntity funding = freeFundingRepository.findById(dto.getId()).orElseThrow(
+        FreeFundingEntity funding = freeFundingRepository.findByProjectIdAndUserId(projectId, dto.getUserId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "freeFunding");}
         );
-        if(!user.getId().equals(funding.getUser().getId()))
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
 
         fundingRollbackService.rollbackFreeFunding(user, funding);
     }
 
     @Transactional
     public void cancelOptionFunding(RequestCancelFundingDto dto) {
+        Long optionId = dto.getId();
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
-        OptionFundingEntity funding = optionFundingRepository.findById(dto.getId()).orElseThrow(
+        OptionFundingEntity funding = optionFundingRepository.findByOptionIdAndUserId(optionId, dto.getUserId()).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "optionFunding");}
         );
-
-        if(!user.getId().equals(funding.getUser().getId()))
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
 
         fundingRollbackService.rollbackOptionFunding(user, funding);
     }
@@ -71,20 +69,27 @@ public class FundingService {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         OptionEntity option = optionValidateService.getOption(dto.getOptionId());
 
-        OptionFundingEntity entity = dto.toEntity(user, option);
+        if(!option.getProject().getProjectStatus().isAvailable())
+            throw new CustomException(ErrorCode.PROJECT_IS_NOT_AVAILABLE);
+
+        OptionFundingEntity entity;
+
+        Optional<OptionFundingEntity> oldOptionFundingOpt = optionFundingRepository.findByOptionIdAndUserId(dto.getOptionId(), dto.getUserId());
+        if(oldOptionFundingOpt.isPresent())
+            entity = oldOptionFundingOpt.get();
+        else
+            entity = dto.toEntity(user, option);
 
         // validate price <> option.price * count
         long totalPrice = option.getPrice() * dto.getCount();
         if(dto.getCouponId() != null)
-            totalPrice = couponService.useCoupon(user.getId(), dto.getCouponId(), entity, totalPrice);
+            totalPrice = couponService.useCoupon(user.getId(), dto.getCouponId(), entity, totalPrice); // option update인 경우 이미 coupon을 사용했다면 rollback발생?
 
         if(totalPrice > user.getPoint())
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(totalPrice));
 
-        Optional<OptionFundingEntity> oldOptionFundingOpt = optionFundingRepository.findByOptionIdAndUserId(dto.getOptionId(), dto.getUserId());
-
         if(oldOptionFundingOpt.isPresent())
-            oldOptionFundingOpt.get().updateCount(dto.getCount());
+            entity.updateCount(dto.getCount());
         else
             optionFundingRepository.save(entity);
 
@@ -95,6 +100,9 @@ public class FundingService {
     public void freeFunding(@Valid RequestFreeFundingDto dto) {
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         ProjectEntity project = projectValidateService.getProjectEntity(dto.getProjectId());
+
+        if(!project.getProjectStatus().isAvailable())
+            throw new CustomException(ErrorCode.PROJECT_IS_NOT_AVAILABLE);
 
         if(dto.getFreePrice() > user.getPoint())
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT, String.valueOf(user.getPoint()), String.valueOf(dto.getFreePrice()));
@@ -108,5 +116,4 @@ public class FundingService {
 
         user.updatePoint(-dto.getFreePrice());
     }
-
 }
