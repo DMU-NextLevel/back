@@ -63,7 +63,7 @@ public class UserEntity extends BasedEntity {
     @Column(length=5, columnDefinition = "char(6)")
     private String role = UserRole.SOCIAL.name();
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = {})
     @JoinColumn(name = "img_id", nullable = true)
     private ImgEntity img;
 

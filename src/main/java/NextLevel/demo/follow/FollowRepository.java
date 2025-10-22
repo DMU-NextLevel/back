@@ -2,6 +2,7 @@ package NextLevel.demo.follow;
 
 import NextLevel.demo.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -43,9 +44,11 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
             "group by follow")
     List<ResponseFollowDto> gerFollowList(@Param("userId") Long userId);
 
+    @Modifying
     @Query("delete from FollowEntity f where f.user.id = :userId")
     void deleteFollowByUserId(@Param("userId") Long userId);
 
+    @Modifying
     @Query("delete from FollowEntity f where f.target.id = :userId")
     void deleteFollowerByUserId(@Param("userId") Long userId);
 

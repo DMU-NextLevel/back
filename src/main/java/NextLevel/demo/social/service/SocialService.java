@@ -155,15 +155,14 @@ public class SocialService {
         imgs.forEach(img->imgService.deleteImg(img, imgPath));
     }
 
-@Transactional
-    public void deleteAllByUser(UserEntity user) {
+    public void deleteAllByUser(UserEntity user, ImgPath imgPath) {
         // delete all social like by user
         socialLikeRepository.deleteAllByUser(user.getId());
 
         // delete all social
         List<SocialEntity> socialList = socialRepository.findAllByUserId(user.getId());
         socialList.forEach(social->{
-            delete(social.getId(), user.getId(), null);
+            delete(social.getId(), user.getId(), imgPath);
         });
     }
 

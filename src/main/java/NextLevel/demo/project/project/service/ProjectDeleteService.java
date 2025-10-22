@@ -75,10 +75,10 @@ public class ProjectDeleteService {
     }
 
     @Transactional
-    public void deleteAllProjectByUser(UserEntity user) {
+    public void deleteAllProjectByUser(UserEntity user, ImgPath imgPath) {
         List<ProjectEntity> projectList = projectRepository.findAllByUserId(user.getId());
         projectList.forEach(project -> {
-            deleteProject(project.getId(), user.getId(), null);
+            deleteProject(project.getId(), user.getId(), imgPath);
         });
     }
 
