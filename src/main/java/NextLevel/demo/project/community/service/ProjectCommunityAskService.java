@@ -61,8 +61,9 @@ public class ProjectCommunityAskService {
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "community");}
         );
 
-        if(! (ask.getUser().getId() == userId) || (ask.getProject().getId() == userId) ) // project validate service 를 통해야 하나?
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
+        if(!ask.getUser().getId().equals(userId))
+            projectValidateService.validateAuthor(ask.getProject(), userId);
+
         projectCommunityAskRepository.deleteById(askId);
     }
 

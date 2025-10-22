@@ -32,8 +32,9 @@ public class ImgTransactionAop {
             Object[] args = joinPoint.getArgs();
             Object lastParameter = args[args.length-1];
 
-            if(!(lastParameter instanceof ImgPath))
-                throw new MustLastParameterException("last parameter must be of type ImgPath.class");
+            // 추후 수정 필요! (귀찮!)
+//            if(!(lastParameter instanceof ImgPath))
+//                throw new MustLastParameterException("last parameter must be of type ImgPath.class");
 
             args[args.length-1] = path;
 

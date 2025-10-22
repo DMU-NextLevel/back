@@ -31,7 +31,7 @@ public class SocialEntity extends BasedEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @OneToMany(mappedBy = "social", fetch = FetchType.LAZY, cascade = {})
+    @OneToMany(mappedBy = "social", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     private List<SocialLikeEntity> likes;
 
     public void update(RequestSocialCreateDto dto) {

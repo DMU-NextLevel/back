@@ -1,6 +1,9 @@
 package NextLevel.demo.user.entity;
 
 import NextLevel.demo.BasedEntity;
+import NextLevel.demo.exception.CustomException;
+import NextLevel.demo.exception.ErrorCode;
+import NextLevel.demo.funding.entity.CouponEntity;
 import NextLevel.demo.img.entity.ImgEntity;
 import NextLevel.demo.role.UserRole;
 import NextLevel.demo.util.StringUtil;
@@ -16,6 +19,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -57,12 +62,15 @@ public class UserEntity extends BasedEntity {
     @Column(length=5, columnDefinition = "char(6)")
     private String role = UserRole.SOCIAL.name();
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "img_id", nullable = true)
     private ImgEntity img;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     private List<UserDetailEntity> userDetail;
+
+    @OneToMany(mappedBy= "user", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    private List<CouponEntity> coupon;
 
     public UserDetailEntity getUserDetail() {
         return userDetail.getFirst();
@@ -102,4 +110,23 @@ public class UserEntity extends BasedEntity {
     public void setAreaNumber(String areaNumber) { this.areaNumber = StringUtil.getFormattedNumber(areaNumber, StringUtil.AREA_NUMBER_FORMAT); }
 
     public void updatePoint(long point) { this.point+= point;}
+
+    public boolean isAdmin() {
+        return this.role.equals(UserRole.ADMIN.name());
+    }
+
+    public void updateUserInfo(String name, String value) {
+        if(name.equals("email"))
+            throw new CustomException(ErrorCode.CAN_NOT_CHANGE_EMAIL);
+
+        try{
+            Field field = UserEntity.class.getDeclaredField(name);
+            field.set(this, value);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+            throw new CustomException(ErrorCode.CAN_NOT_INVOKE, name);
+        }
+
+        checkRole();
+    }
 }

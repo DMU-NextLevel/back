@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,10 +16,10 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
     @Query("select p from ProjectEntity p "
         + "left join fetch p.user u "
-        + "left join fetch u.userDetail "
+        // + "left join fetch u.userDetail "
         + "left join fetch p.stories s "
         + "where p.id = :id")
-    // only user create or update function
+    // only project create or update function
     Optional<ProjectEntity> findByIdWithAll(@Param("id") Long id);
 
     @Query("select p from ProjectEntity p left join fetch p.tags pt left join fetch pt.tag where p.id in :ids")
@@ -39,5 +40,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             "where p.id = :projectId " +
             "group by p ")
     SelectProjectDetailDao selectProjectDetailDao(@Param("projectId") Long projectId, @Param("userId") Long userId);
+
+    @Query("select p from ProjectEntity p where p.user.id = :userId")
+    List<ProjectEntity> findAllByUserId(@Param("userId") Long userId);
 
 }

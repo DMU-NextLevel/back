@@ -51,4 +51,9 @@ public class FollowService {
         return followRepository.gerFollowList(userId);
     }
 
+    public void deleteFollowByUserId(UserEntity user) {
+        followRepository.deleteFollowByUserId(user.getId());
+        followRepository.deleteFollowerByUserId(user.getId());
+    }
+
 }

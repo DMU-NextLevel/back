@@ -102,26 +102,6 @@ public class ProjectService {
         projectRepository.save(dto.toProjectEntity(oldProject.getUser(), img)); // 값이 있는 것만 update 형식으로 수정 필요
     }
 
-    // 삭제
-    @Transactional
-    @ImgTransaction
-    public void deleteProject(Long id, ImgPath imgPath) {
-        Optional<ProjectEntity> oldProjectOptional = projectRepository.findById(id);
-        if(oldProjectOptional.isEmpty())
-            throw new CustomException(ErrorCode.NOT_FOUND, "project");
-        ProjectEntity oldProject = oldProjectOptional.get();
-
-        // 펀딩 금액이 남아있다면 모두 환불 처리하기
-        fundingRollbackService.rollbackByProject(oldProject);
-
-        // 다른 soft적 처리 필요한 부분 처리하기
-
-        // img 처리
-        projectStoryService.updateProjectStory(oldProject, new ArrayList<>(), imgPath);
-
-        return; // 아직 구현하지 않음 + soft delete 처리 고민중 .....
-    }
-
     // get list
     public ResponseProjectListDto getAllProjects(RequestMainPageProjectListDto dto) {
         return projectDslRepository.selectProjectDsl(dto);

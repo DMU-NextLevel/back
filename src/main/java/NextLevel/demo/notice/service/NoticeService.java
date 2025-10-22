@@ -11,6 +11,8 @@ import NextLevel.demo.notice.entity.NoticeEntity;
 import NextLevel.demo.notice.entity.NoticeImgEntity;
 import NextLevel.demo.notice.repository.NoticeImgRepository;
 import NextLevel.demo.notice.repository.NoticeRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;

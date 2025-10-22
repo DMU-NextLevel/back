@@ -2,6 +2,7 @@ package NextLevel.demo.admin.project;
 
 import NextLevel.demo.common.SuccessResponse;
 import NextLevel.demo.project.project.service.ProjectDeleteService;
+import NextLevel.demo.util.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +32,7 @@ public class AdminProjectController {
 
     @DeleteMapping("/{projectId}")
     public ResponseEntity removeProject(@PathVariable("projectId") Long projectId) {
-        projectDeleteService.deleteProject(projectId, null);
+        projectDeleteService.deleteProject(projectId, JWTUtil.getUserIdFromSecurityContext(), null);
         return ResponseEntity.ok().body(new SuccessResponse("success", null));
     }
 }

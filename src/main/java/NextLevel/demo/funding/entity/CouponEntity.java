@@ -1,5 +1,6 @@
 package NextLevel.demo.funding.entity;
 
+import NextLevel.demo.BasedEntity;
 import NextLevel.demo.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class CouponEntity {
+public class CouponEntity extends BasedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

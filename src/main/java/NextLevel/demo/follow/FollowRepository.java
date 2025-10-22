@@ -43,4 +43,10 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
             "group by follow")
     List<ResponseFollowDto> gerFollowList(@Param("userId") Long userId);
 
+    @Query("delete from FollowEntity f where f.user.id = :userId")
+    void deleteFollowByUserId(@Param("userId") Long userId);
+
+    @Query("delete from FollowEntity f where f.target.id = :userId")
+    void deleteFollowerByUserId(@Param("userId") Long userId);
+
 }

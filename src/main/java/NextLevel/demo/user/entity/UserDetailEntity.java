@@ -1,5 +1,6 @@
 package NextLevel.demo.user.entity;
 
+import NextLevel.demo.BasedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -8,7 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Table(name = "user_detail")
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserDetailEntity {
+public class UserDetailEntity  extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

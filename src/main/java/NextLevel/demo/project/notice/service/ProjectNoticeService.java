@@ -12,6 +12,7 @@ import NextLevel.demo.project.notice.repository.ProjectNoticeRepository;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.project.project.service.ProjectValidateService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,9 @@ public class ProjectNoticeService {
     private final ProjectNoticeRepository projectNoticeRepository;
     private final ImgServiceImpl imgService;
     private final ProjectValidateService projectValidateService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public List<ProjectNoticeEntity> getAllNotice(Long projectId){
         ProjectEntity project = projectValidateService.getProjectEntity(projectId);
@@ -67,13 +71,34 @@ public class ProjectNoticeService {
         }
     }
 
-    public void deleteProjectNotice(Long id, Long userId) {
+    @Transactional
+    @ImgTransaction
+    public void deleteProjectNotice(Long id, Long userId, ImgPath imgPath) {
         ProjectNoticeEntity notice = projectNoticeRepository.findByIdWithProject(id).orElseThrow(
                 ()->{return new CustomException(ErrorCode.NOT_FOUND, "notice");}
         );
-        if(!notice.getProject().getUser().getId().equals(userId))
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
+        projectValidateService.validateAuthor(notice.getProject(), userId);
+
+        ImgEntity img = notice.getImg();
         projectNoticeRepository.deleteById(id);
+
+        imgService.deleteImg(img, imgPath);
+    }
+
+    @Transactional
+    @ImgTransaction
+    public void deleteAllProjectNotice(Long projectId, ImgPath imgPath) {
+        ProjectEntity project = projectValidateService.getProjectEntity(projectId);
+
+        List<ProjectNoticeEntity> noticeList = projectNoticeRepository.findAllByProjectId(project.getId());
+
+        List<ImgEntity> imgList = noticeList.stream().map(ProjectNoticeEntity::getImg).toList();
+
+        projectNoticeRepository.deleteAll(noticeList);
+
+        entityManager.flush();
+
+        imgList.forEach(img -> imgService.deleteImg(img, imgPath));
     }
 
 }

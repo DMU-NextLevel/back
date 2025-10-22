@@ -18,7 +18,7 @@ public class ProjectTagEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(targetEntity = TagEntity.class, fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @ManyToOne(targetEntity = TagEntity.class, fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "tag_id")
     private TagEntity tag;
 
