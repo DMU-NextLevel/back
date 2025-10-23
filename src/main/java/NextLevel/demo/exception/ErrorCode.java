@@ -10,6 +10,7 @@ public enum ErrorCode {
     NOT_AUTHOR(HttpStatus.BAD_REQUEST, "00001","작성자가 아닙니다"),
     ACCESS_TOKEN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "00002", "access, refresh token을 다시 발급해 주세요"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "00003", "not found %s"),
+    NOT_ADMIN(HttpStatus.UNAUTHORIZED, "10001", "not admin"),
 
     //register
     ALREADY_EXISTS_EMAIL(HttpStatus.BAD_REQUEST, "01001","email already exists"),

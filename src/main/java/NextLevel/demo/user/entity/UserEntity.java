@@ -100,6 +100,9 @@ public class UserEntity extends BasedEntity {
     }
 
     public void checkRole() {
+        if(role.equals(UserRole.ADMIN.name()))
+            return;
+
         if(name != null && !name.isEmpty() &&
                 nickName != null && !nickName.isEmpty() &&
                 address != null && !address.isEmpty() &&

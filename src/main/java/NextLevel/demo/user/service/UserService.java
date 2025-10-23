@@ -51,6 +51,9 @@ public class UserService {
         if(dto.getName().equals("nickName") && !userValidateService.checkNickNameIsNotExist(dto.getValue()))
             throw new CustomException(ErrorCode.ALREADY_EXISTS_NICKNAME);
 
+        if(dto.getName().equals("role"))
+            throw new CustomException(ErrorCode.CAN_NOT_INVOKE, "role");
+
         oldUser.updateUserInfo(dto.getName(), dto.getValue());
 
         // userRepository.save(oldUser);

@@ -6,6 +6,7 @@ import NextLevel.demo.user.dto.user.request.RequestUpdateUserInfoDto;
 import NextLevel.demo.user.dto.user.response.ResponseUserInfoDetailDto;
 import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.user.repository.UserRepository;
+import NextLevel.demo.user.service.UserDeleteService;
 import NextLevel.demo.user.service.UserService;
 import NextLevel.demo.user.service.UserValidateService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class AdminUserService {
     private final UserValidateService userValidateService;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final UserDeleteService userDeleteService;
 
     public List<ResponseUserInfoDetailDto> getUserList(Pageable pageable) {
         return userRepository.findAll(pageable).stream().map(ResponseUserInfoDetailDto::of).toList();
@@ -33,7 +35,12 @@ public class AdminUserService {
 
     @Transactional
     public void updateUser(RequestUpdateUserInfoDto dto) {
-        UserEntity oldUser = userValidateService.getUserInfoWithAccessToken(dto.getId());
+        UserEntity oldUser = userValidateService.findUserWithUserId(dto.getId());
+
+        if(dto.getName().equals("point")) {
+            oldUser.updatePoint(Integer.parseInt(dto.getValue()));
+            return;
+        }
 
         if(dto.getName().equals("nickName") && !userValidateService.checkNickNameIsNotExist(dto.getValue()))
             throw new CustomException(ErrorCode.ALREADY_EXISTS_NICKNAME);
@@ -41,8 +48,8 @@ public class AdminUserService {
         oldUser.updateUserInfo(dto.getName(), dto.getValue());
     }
 
-    public void removeUser() {
-        // userService. ; // delete 어디감?
+    public void removeUser(Long targetId) {
+        userDeleteService.deleteUser(targetId, null);
     }
 
 }
