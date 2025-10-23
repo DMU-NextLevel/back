@@ -125,7 +125,7 @@ public class UserEntity extends BasedEntity {
             throw new CustomException(ErrorCode.CAN_NOT_CHANGE_EMAIL);
 
         try{
-            java.lang.reflect.Method method = UserEntity.class.getDeclaredMethod(StringUtil.setGetterName(name));
+            java.lang.reflect.Method method = UserEntity.class.getDeclaredMethod(StringUtil.setGetterName(name), String.class);
             method.invoke(this, value);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             e.printStackTrace();
