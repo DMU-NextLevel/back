@@ -4,6 +4,7 @@ import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.service.ProjectValidateService;
 import NextLevel.demo.summery.dto.ProjectSummeryDto;
 import NextLevel.demo.summery.dto.TotalSummeryDto;
+import NextLevel.demo.summery.dto.UserSummeryDto;
 import NextLevel.demo.summery.repo.SummeryRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,6 +65,15 @@ public class SummeryService {
         Long totalFundingPrice = (totalFreePrice != null ? totalFreePrice : 0L) + (totalOptionPrice != null ? totalOptionPrice : 0L);
 
         return new ProjectSummeryDto(start.getMonthValue(), totalUserCount, totalFundingPrice);
+    }
+
+    @Transactional
+    public UserSummeryDto userSummery() {
+        Long emailUserCount = summeryRepository.getEmailUserCount();
+        Long socialUserCount = summeryRepository.getSocialUserCount();
+        Long totalPoint = summeryRepository.getTotalPoint();
+
+        return new UserSummeryDto(socialUserCount, emailUserCount, totalPoint);
     }
 
 }

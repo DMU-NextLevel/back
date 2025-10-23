@@ -63,4 +63,15 @@ public interface SummeryRepository extends Repository<UserEntity, Long> {
             + "where ff.project.id = :projectId and ff.createdAt >= :start and ff.createdAt <= :end")
     Long getFreeFundingCount(@Param("projectId") long projectId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+    // --------------------------------- user summery ---------------
+
+    @Query("select count(distinct u.user) from UserDetailEntity u where u.socialId is not null")
+    Long getSocialUserCount();
+
+    @Query("select count(distinct u.user) from UserDetailEntity u where u.socialId is null")
+    Long getEmailUserCount();
+
+    @Query("select sum(u.point) from UserEntity u")
+    Long getTotalPoint();
+
 }

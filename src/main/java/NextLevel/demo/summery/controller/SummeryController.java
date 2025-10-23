@@ -25,4 +25,9 @@ public class SummeryController {
         return ResponseEntity.ok().body(new SuccessResponse("success", summeryService.totalSummery()));
     }
 
+    @GetMapping("/public/summery/user")
+    public ResponseEntity getUserSummery() {
+        return ResponseEntity.ok().body(new SuccessResponse("success", summeryService.userSummery()));
+    }
+
 }
