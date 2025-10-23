@@ -27,6 +27,11 @@ public class AdminUserController {
         return ResponseEntity.ok().body(new SuccessResponse("success", adminUserService.getUserList(pageable)));
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity getUserInfo(@PathVariable("userId") Long userId) {
+        return ResponseEntity.ok().body(new SuccessResponse("success", adminUserService.getUserInfo(userId)));
+    }
+
     public ResponseEntity stopUser() {
         return null;
     }

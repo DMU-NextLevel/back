@@ -29,6 +29,11 @@ public class AdminUserService {
         return userRepository.findAll(pageable).stream().map(ResponseUserInfoDetailDto::of).toList();
     }
 
+    public ResponseUserInfoDetailDto getUserInfo(Long userId) {
+        UserEntity user = userValidateService.findUserWithUserId(userId);
+        return ResponseUserInfoDetailDto.of(user);
+    }
+
     public void stopUser() {
         // not yet
     }
