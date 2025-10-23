@@ -29,8 +29,8 @@ public class AdminProjectService {
 
     }
 
-    public void removeProject(Long projectId) {
-        projectDeleteService.deleteProject(projectId, null);
+    public void removeProject(Long projectId, Long userId) {
+        projectDeleteService.deleteProject(projectId, userId,null);
     }
 
 }

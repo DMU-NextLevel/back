@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "project_community_answer")
@@ -15,6 +17,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @Getter
+@SQLDelete(sql="update project_community_answer set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class ProjectCommunityAnswerEntity extends BasedEntity {
 
     @Id

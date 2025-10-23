@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
+// social hard delete
 public class SocialEntity extends BasedEntity {
 
     @Id
@@ -31,7 +32,7 @@ public class SocialEntity extends BasedEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @OneToMany(mappedBy = "social", fetch = FetchType.LAZY, cascade = {})
+    @OneToMany(mappedBy = "social", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     private List<SocialLikeEntity> likes;
 
     public void update(RequestSocialCreateDto dto) {

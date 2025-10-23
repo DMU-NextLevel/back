@@ -2,6 +2,7 @@ package NextLevel.demo.user.service;
 
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
+import NextLevel.demo.img.service.ImgPath;
 import NextLevel.demo.img.service.ImgService;
 import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDto;
@@ -47,30 +48,12 @@ public class UserService {
     public UserEntity updateUserInfo(RequestUpdateUserInfoDto dto, HttpServletRequest request, HttpServletResponse response) {
         UserEntity oldUser = userValidateService.getUserInfoWithAccessToken(dto.getId());
 
-        switch(dto.getName()){
-            case "email":
-                throw new CustomException(ErrorCode.CAN_NOT_CHANGE_EMAIL);
-            case "nickName":
-                if(!userValidateService.checkNickNameIsNotExist(dto.getValue()))
-                    throw new CustomException(ErrorCode.ALREADY_EXISTS_NICKNAME);
-                break;
-        }
+        if(dto.getName().equals("nickName") && !userValidateService.checkNickNameIsNotExist(dto.getValue()))
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_NICKNAME);
 
-        try {
-            Method setterMethod = UserEntity.class.getDeclaredMethod(StringUtil.setGetterName(dto.getName()), String.class);
-            setterMethod.invoke(oldUser, dto.getValue());
-        } catch (InvocationTargetException e) {
-            if(e.getTargetException() instanceof CustomException)
-                throw (CustomException) e.getTargetException();
-            else
-                throw new CustomException(ErrorCode.SIBAL_WHAT_IS_IT, e.getTargetException().getMessage());
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new CustomException(ErrorCode.CAN_NOT_INVOKE, dto.getName());
-        }
+        oldUser.updateUserInfo(dto.getName(), dto.getValue());
 
-        oldUser.checkRole();
-        userRepository.save(oldUser);
+        // userRepository.save(oldUser);
 
         jwtUtil.refreshAccessToken(request, response, oldUser.getRole());
         return oldUser;
@@ -93,7 +76,7 @@ public class UserService {
 
     @ImgTransaction
     @Transactional
-    public UserEntity updateUserImg(Long userId, MultipartFile img, ArrayList<Path> imgPaths) {
+    public UserEntity updateUserImg(Long userId, MultipartFile img, ImgPath imgPath) {
         UserEntity oldUser = userRepository.findById(userId).orElseThrow(
             ()->{throw new CustomException(ErrorCode.ACCESS_TOKEN_ERROR);}
         );
@@ -101,9 +84,9 @@ public class UserService {
             throw new CustomException(ErrorCode.INPUT_REQUIRED_PARAMETER);
 
         if(oldUser.getImg() == null)
-            oldUser.setImg(imgService.saveImg(img, imgPaths));
+            oldUser.setImg(imgService.saveImg(img, imgPath));
         else
-            imgService.updateImg(img, oldUser.getImg(), imgPaths);
+            imgService.updateImg(img, oldUser.getImg(), imgPath);
         return oldUser;
     }
 

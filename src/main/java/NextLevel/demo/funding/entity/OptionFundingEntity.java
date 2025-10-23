@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "option_funding")
@@ -16,6 +18,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
+@SQLDelete(sql="update option_funding set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class OptionFundingEntity extends BasedEntity {
 
     @Id

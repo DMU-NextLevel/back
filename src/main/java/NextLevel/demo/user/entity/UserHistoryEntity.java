@@ -1,5 +1,6 @@
 package NextLevel.demo.user.entity;
 
+import NextLevel.demo.BasedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,13 +12,17 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name= "user_history")
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class UserHistoryEntity {
+@SQLDelete(sql="update user_history set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
+public class UserHistoryEntity extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

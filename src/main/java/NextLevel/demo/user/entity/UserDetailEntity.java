@@ -1,14 +1,19 @@
 package NextLevel.demo.user.entity;
 
+import NextLevel.demo.BasedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "user_detail")
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserDetailEntity {
+@SQLDelete(sql="update user_detail set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
+public class UserDetailEntity  extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -17,23 +17,28 @@ import NextLevel.demo.user.entity.UserEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "project")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql="update project set delete_at = now(), img_id = null where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class ProjectEntity extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY, cascade = {})
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
@@ -43,7 +48,7 @@ public class ProjectEntity extends BasedEntity {
     @Column(nullable = false)
     private String content;
 
-    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.LAZY) // project list api에서 N+1을 발생 시킴
+    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     @JoinColumn(name = "img_id")
     private ImgEntity titleImg;
 
@@ -59,28 +64,28 @@ public class ProjectEntity extends BasedEntity {
     @Enumerated(EnumType.STRING)
     private ProjectStatus projectStatus;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<ProjectTagEntity> tags;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private List<ProjectStoryEntity> stories;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     private Set<OptionEntity> options;
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     private Set<FreeFundingEntity> freeFundings;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     private Set<LikeEntity> likes;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     private List<ProjectCommunityAskEntity> communities;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {})
     private List<ProjectNoticeEntity> notices;
 
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<ProjectViewEntity> views;
 
     public void setTags(List<ProjectTagEntity> tags) {
@@ -88,6 +93,8 @@ public class ProjectEntity extends BasedEntity {
     }
     public void setFundingData(ProjectEntity project) {this.freeFundings = project.getFreeFundings();this.options = project.getOptions();}
     public void updateStatus(ProjectStatus status) { this.projectStatus = status; }
+
+    public void setStoriesEmpty() { this.stories = new ArrayList<>(); }
 
     public void expireProject(Integer totalFundingPrice) {
         if(this.expiredAt.isAfter(LocalDate.now()))

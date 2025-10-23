@@ -17,6 +17,8 @@ import jakarta.persistence.Table;
 import java.util.Date;
 
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "project_notice")
@@ -25,6 +27,8 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
+@SQLDelete(sql="update project_notice set delete_at = now(), img_id = null where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class ProjectNoticeEntity extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,13 +43,13 @@ public class ProjectNoticeEntity extends BasedEntity {
     @Column
     private String content;
 
+    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    private ImgEntity img;
+
     public void update(SaveProjectNoticeRequestDto dto) {
         if(dto.getContent() != null && !dto.getContent().isEmpty())
             content = dto.getContent();
         if(dto.getTitle() != null && !dto.getTitle().isEmpty())
             title = dto.getTitle();
     }
-
-    @ManyToOne(targetEntity = ImgEntity.class, fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    private ImgEntity img;
 }

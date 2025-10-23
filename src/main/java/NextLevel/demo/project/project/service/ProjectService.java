@@ -6,6 +6,7 @@ import NextLevel.demo.follow.SelectSocialProfileService;
 import NextLevel.demo.funding.service.FundingRollbackService;
 import NextLevel.demo.funding.service.FundingValidateService;
 import NextLevel.demo.img.entity.ImgEntity;
+import NextLevel.demo.img.service.ImgPath;
 import NextLevel.demo.img.service.ImgServiceImpl;
 import NextLevel.demo.img.service.ImgTransaction;
 import NextLevel.demo.project.project.dto.request.CreateProjectDto;
@@ -53,18 +54,18 @@ public class ProjectService {
     // 추가
     @ImgTransaction
     @Transactional
-    public void save(CreateProjectDto dto, ArrayList<Path> imgPaths) {
+    public void save(CreateProjectDto dto, ImgPath imgPath) {
         // user 처리
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         validateUser(user);
 
         if(dto.getTitleImg() == null || dto.getTitleImg().isEmpty())
             throw new CustomException(ErrorCode.INPUT_REQUIRED_PARAMETER);
-        ImgEntity img = imgService.saveImg(dto.getTitleImg(), imgPaths);
+        ImgEntity img = imgService.saveImg(dto.getTitleImg(), imgPath);
 
         ProjectEntity newProject = projectRepository.save(dto.toProjectEntity(user, img));
 
-        projectStoryService.saveNewProjectStory(newProject, dto.getImgs(), imgPaths);
+        projectStoryService.saveNewProjectStory(newProject, dto.getImgs(), imgPath);
         tagService.saveNewTags(newProject, dto.getTags());
     }
     private void validateUser(UserEntity user) {
@@ -75,7 +76,7 @@ public class ProjectService {
     // 수정
     @ImgTransaction
     @Transactional
-    public void update(CreateProjectDto dto, ArrayList<Path> imgPaths) {
+    public void update(CreateProjectDto dto, ImgPath imgPath) {
         Optional<ProjectEntity> oldProjectOptional = projectRepository.findByIdWithAll(dto.getId());
 
         if(oldProjectOptional.isEmpty())
@@ -88,7 +89,7 @@ public class ProjectService {
 
         ImgEntity img = oldProject.getTitleImg();
         if(dto.getTitleImg() != null)
-            img = imgService.updateImg(dto.getTitleImg(), oldProject.getTitleImg(), imgPaths);
+            img = imgService.updateImg(dto.getTitleImg(), oldProject.getTitleImg(), imgPath);
 
         // tag 처리
         if(dto.getTags() != null && !dto.getTags().isEmpty())
@@ -96,7 +97,7 @@ public class ProjectService {
 
         // img 처리
         if(dto.getImgs() != null && !dto.getImgs().isEmpty())
-            projectStoryService.updateProjectStory(oldProject, dto.getImgs(), imgPaths);
+            projectStoryService.updateProjectStory(oldProject, dto.getImgs(), imgPath);
 
         projectRepository.save(dto.toProjectEntity(oldProject.getUser(), img)); // 값이 있는 것만 update 형식으로 수정 필요
     }

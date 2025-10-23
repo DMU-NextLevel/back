@@ -16,4 +16,7 @@ public interface ProjectNoticeRepository extends JpaRepository<ProjectNoticeEnti
     @Query("select pn from ProjectNoticeEntity pn where pn.project.id = :projectId order by pn.createdAt desc")
     List<ProjectNoticeEntity> findAllByProjectOrderByCreatedAt(@Param("projectId") Long projectId);
 
+    @Query("select n from ProjectNoticeEntity n where n.project.id = :projectId")
+    List<ProjectNoticeEntity> findAllByProjectId(@Param("projectId") Long projectId);
+
 }

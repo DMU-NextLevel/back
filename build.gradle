@@ -60,6 +60,7 @@ dependencies {
 	implementation("com.sun.mail:javax.mail:1.6.2")
 
     // test h2 db
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.h2database:h2'
 
     // batch

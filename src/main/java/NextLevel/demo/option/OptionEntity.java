@@ -1,5 +1,6 @@
 package NextLevel.demo.option;
 
+import NextLevel.demo.BasedEntity;
 import NextLevel.demo.funding.entity.OptionFundingEntity;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import jakarta.persistence.Column;
@@ -20,6 +21,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "`option`")
@@ -27,7 +30,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class OptionEntity {
+@SQLDelete(sql="update `option` set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
+public class OptionEntity extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

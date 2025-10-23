@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "project_img", uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "img_id"}))
 @Getter
 @NoArgsConstructor
+// project_img hard delete
 public class ProjectStoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

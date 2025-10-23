@@ -3,6 +3,7 @@ package NextLevel.demo.user.service.userService;
 import NextLevel.demo.exception.CustomException;
 import NextLevel.demo.exception.ErrorCode;
 import NextLevel.demo.img.entity.ImgEntity;
+import NextLevel.demo.img.service.ImgPath;
 import NextLevel.demo.img.service.ImgService;
 import NextLevel.demo.user.dto.user.request.RequestUpdateUserInfoDto;
 import NextLevel.demo.user.entity.UserEntity;
@@ -13,6 +14,7 @@ import NextLevel.demo.user.service.UserService;
 import NextLevel.demo.util.jwt.JWTUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
+// @Disabled
 public class UserServiceTest {
 
     @InjectMocks
@@ -146,7 +149,7 @@ public class UserServiceTest {
 
         Assertions.assertThrows(
                 CustomException.class,
-                ()->userService.updateUserImg(1L, null, new ArrayList<Path>())
+                ()->userService.updateUserImg(1L, null, new ImgPath())
         );
     }
 
@@ -158,7 +161,7 @@ public class UserServiceTest {
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(mockUser));
         ArgumentCaptor<ArrayList<Path>> captor = ArgumentCaptor.forClass(ArrayList.class);
 
-        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class) , new ArrayList<Path>());
+        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class) , new ImgPath());
 
         Assertions.assertEquals(oldImg, user.getImg());
     }
@@ -168,7 +171,7 @@ public class UserServiceTest {
         mockUser.setImg(null);
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(mockUser));
 
-        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class), new ArrayList<Path>());
+        UserEntity user = userService.updateUserImg(0L, Mockito.mock(MultipartFile.class), new ImgPath());
 
         Assertions.assertEquals(mockImg, user.getImg());
     }

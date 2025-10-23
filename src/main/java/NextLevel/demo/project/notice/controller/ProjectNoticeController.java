@@ -45,7 +45,7 @@ public class ProjectNoticeController {
 
     @DeleteMapping("/api1/project/notice/{noticeId}")
     public ResponseEntity<?> deleteProjectNotice(@PathVariable("noticeId") long noticeId){
-        projectNoticeService.deleteProjectNotice(noticeId, JWTUtil.getUserIdFromSecurityContext());
+        projectNoticeService.deleteProjectNotice(noticeId, JWTUtil.getUserIdFromSecurityContext(), null);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("success", null));
     }
 }
