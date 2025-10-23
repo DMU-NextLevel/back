@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+// project_tag hard delete
 public class ProjectTagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

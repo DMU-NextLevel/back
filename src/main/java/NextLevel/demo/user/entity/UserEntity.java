@@ -29,12 +29,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "user")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql="update user set delete_at = now(), img_id = null where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class UserEntity extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

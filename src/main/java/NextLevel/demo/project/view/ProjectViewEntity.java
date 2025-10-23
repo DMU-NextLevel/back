@@ -1,5 +1,6 @@
 package NextLevel.demo.project.view;
 
+import NextLevel.demo.BasedEntity;
 import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.user.entity.UserEntity;
 import jakarta.persistence.Column;
@@ -15,11 +16,15 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name="project_view")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProjectViewEntity {
+@SQLDelete(sql="update project_view set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
+public class ProjectViewEntity extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

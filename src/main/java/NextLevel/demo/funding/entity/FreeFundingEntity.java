@@ -5,6 +5,8 @@ import NextLevel.demo.project.project.entity.ProjectEntity;
 import NextLevel.demo.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "free_funding")
@@ -12,6 +14,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
+@SQLDelete(sql="update free_funding set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class FreeFundingEntity extends BasedEntity {
 
     @Id

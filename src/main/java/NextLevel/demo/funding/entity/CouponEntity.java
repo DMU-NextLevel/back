@@ -4,6 +4,8 @@ import NextLevel.demo.BasedEntity;
 import NextLevel.demo.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "coupon")
@@ -11,6 +13,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
+@SQLDelete(sql="update coupon set delete_at = now() where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class CouponEntity extends BasedEntity {
 
     @Id

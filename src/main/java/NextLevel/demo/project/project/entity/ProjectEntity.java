@@ -24,11 +24,15 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "project")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql="update project set delete_at = now(), img_id = null where id = ?")
+@SQLRestriction("delete_at IS NULL")
 public class ProjectEntity extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
