@@ -79,6 +79,10 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
             user-name-attribute: id  # Google의 사용자 식별자 (고유 ID)
 
+  batch:
+    jdbc:
+      initialize-schema: always
+
 
 jwt:
   secret: ${JWT_SECRET}
@@ -107,6 +111,9 @@ email:
   EMAIL_TIME: 300000 # 5 * 60 * 1000 # 5분
   EMAIL: ${EMAIL}
   EMAIL_PASSWORD: "${EMAIL_PASSWORD}"
+
+scheduler:
+  day: 0 0 3 * * * # 메일 세벽 3시 작동
 
 ---
 spring:
