@@ -9,6 +9,7 @@ services:
     volumes:
       - ${PROJECT_DIR}/.env:/app/.env
       - ${PROJECT_DIR}/img:/app/img
+      - ${PROJECT_DIR}/log:/app/log
     command: ["java", "-jar", "/app/app.jar", "--spring.profiles.active=prod"]
     networks:
       - mysql-network

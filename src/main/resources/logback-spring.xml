@@ -16,7 +16,7 @@
       <onMatch>ACCEPT</onMatch>
       <onMismatch>DENY</onMismatch>
     </filter>
-    <file>log.txt</file>
+    <file>log/log.txt</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <fileNamePattern>
         %d{yyyyMMdd}_%i.txt
