@@ -14,20 +14,32 @@ import NextLevel.demo.user.repository.UserRepository;
 import NextLevel.demo.user.service.LoginService;
 import NextLevel.demo.util.jwt.JWTUtil;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authorization.AuthorityAuthorizationManager;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
@@ -81,8 +93,61 @@ public class SecurityConfig {
                 .requestMatchers("/api1/**").hasRole("USER")
                 .requestMatchers("/social/**").hasRole("SOCIAL")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/admin/**").access(new AuthorizationManager<RequestAuthorizationContext>() {
+                        @Override
+                        public AuthorizationDecision check(
+                                Supplier<Authentication> authentication,
+                                RequestAuthorizationContext object
+                        ) {
+                            return null;
+                        }
+                    })
                 .anyRequest().denyAll() // 그 외 요청은 모두 거절
             )
+                .authorizeHttpRequests(
+                        new Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>() {
+                            @Override
+                            public void customize(
+                                    AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizationManagerRequestMatcherRegistry) {
+                                authorizationManagerRequestMatcherRegistry.requestMatchers()
+                            }
+                        })
+                    .authorizeHttpRequests(auth->
+                            auth.requestMatchers("/api1/**").access(new AuthorizationManager<RequestAuthorizationContext>() {
+                                @Override
+                                public void verify(Supplier<Authentication> authentication,
+                                                   RequestAuthorizationContext object) {
+                                    AuthorizationManager.super.verify(authentication, object);
+                                }
+                                @Override
+                                public AuthorizationDecision check(Supplier<Authentication> authentication,
+                                                                   RequestAuthorizationContext object) {
+                                    withRoleHierarchy(AuthorityAuthorizationManager
+                                            .hasAnyRole(AuthorizeHttpRequestsConfigurer.this.rolePrefix, new String[] { role }))
+                                }
+                            })
+                    )
+                .authorizeHttpRequests(
+                        new Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>() {
+                            @Override
+                            public void customize(
+                                    AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizationManagerRequestMatcherRegistry) {
+                                authorizationManagerRequestMatcherRegistry.requestMatchers(new RequestMatcher() {
+                                    @Override
+                                    public boolean matches(HttpServletRequest request) {
+                                        return false;
+                                    }
+                                }).access(new AuthorizationManager<RequestAuthorizationContext>() {
+
+                                    @Override
+                                    public AuthorizationDecision check(Supplier<Authentication> authentication,
+                                                                       RequestAuthorizationContext object) {
+                                        return null;
+                                    }
+                                });
+                            }
+                        }
+                )
 
             .oauth2Login(oauth2 -> oauth2
                 .authorizedClientRepository(new NullAuthorizedClientRepository())
