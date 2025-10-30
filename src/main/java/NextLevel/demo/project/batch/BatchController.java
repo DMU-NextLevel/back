@@ -11,7 +11,7 @@ public class BatchController {
 
     private final ProjectBatchService projectBatchService;
 
-    @GetMapping("/public/batch")
+    @GetMapping("/admin/batch")
     public ResponseEntity doBatch() {
         projectBatchService.runProjectStatusJob();
         return ResponseEntity.ok().build();

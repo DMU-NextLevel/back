@@ -19,11 +19,11 @@ public class ProjectBatchService {
     private final JobLauncher jobLauncher;
     private final Job projectStatusJob;
 
-    @Scheduled(cron = "")
+    @Scheduled(cron = "${scheduler.day}")
     public void runProjectStatusJob() {
         try{
             JobParameters jobParameters = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis())
+                    .addLong("time", 1L)
                     .toJobParameters();
 
             jobLauncher.run(projectStatusJob, jobParameters);

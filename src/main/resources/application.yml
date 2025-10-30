@@ -112,6 +112,9 @@ email:
   EMAIL: ${EMAIL}
   EMAIL_PASSWORD: "${EMAIL_PASSWORD}"
 
+scheduler:
+  day: 0 0 3 * * * # 메일 세벽 3시 작동
+
 ---
 spring:
   config:

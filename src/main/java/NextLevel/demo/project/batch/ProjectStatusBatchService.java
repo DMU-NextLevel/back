@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,6 +79,7 @@ public class ProjectStatusBatchService {
                     List<ProjectSerializableDto> dtoList = projectChunk.getItems().stream().map(ProjectSerializableDto::of).toList();
                     stepExecution.getJobExecution().getExecutionContext().put("projectDtoList", dtoList);
                 })
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -92,15 +94,24 @@ public class ProjectStatusBatchService {
         return new JdbcCursorItemReaderBuilder<ProjectAndFundingPriceDto>()
                 .name("projectFundingPriceReader")
                 .sql("""
-                     select 
-                       p.id as projectId,
-                       COALESCE( (select sum(ff.price) from FreeFundingEntity ff where ff.project.id = p.id), 0)\s
-                        +
-                        COALESCE( (select sum(of.count * of.option.price) from OptionFundingEntity of where of.option.project.id = p.id), 0)
-                        as fundingPrice
-                     from ProjectEntity p
-                     where p.id in :projectIdList
-                     """)
+                        SELECT 
+                            p.id AS projectId,
+                            
+                            COALESCE((
+                                SELECT SUM(ff.price)
+                                FROM free_funding ff
+                                WHERE ff.project_id = p.id
+                            ), 0)
+                                +
+                            COALESCE((
+                                SELECT SUM(ofd.count * o.price)
+                                FROM option_funding ofd
+                                JOIN `option` o ON ofd.option_id = o.id
+                                WHERE o.project_id = p.id
+                            ), 0) AS fundingPrice
+                        FROM project p
+                        WHERE p.id IN (?)
+                """)
                 .queryArguments(projectChunk.stream().map(ProjectSerializableDto::getProjectId).toList())
                 .rowMapper(new RowMapper() {
                     @Override
@@ -128,15 +139,15 @@ public class ProjectStatusBatchService {
         return new JdbcBatchItemWriterBuilder<ProjectAndFundingPriceDto>()
                 .sql("""
                         update project
-                        set projectStatus = :projectStatus
-                        where project.id = :projectId
+                        set project_status = ?
+                        where project.id = ?
                         """)
                 .dataSource(dataSource)
                 .itemPreparedStatementSetter(new ItemPreparedStatementSetter<ProjectAndFundingPriceDto>() {
                     @Override
                     public void setValues(ProjectAndFundingPriceDto projectDto, PreparedStatement ps) throws SQLException {
-                        ps.setObject(1, projectDto.getProjectStatus());
-                        ps.setLong(1, projectDto.getProjectSerializableDto().getProjectId());
+                        ps.setObject(1, projectDto.getProjectStatus().name());
+                        ps.setLong(2, projectDto.getProjectSerializableDto().getProjectId());
                     }
                 })
                 .beanMapped()
@@ -153,6 +164,7 @@ public class ProjectStatusBatchService {
                 .reader(projectFundingPriceReader)
                 .processor(projectProcessor())
                 .writer(projectWriter())
+                .allowStartIfComplete(true)
                 .build();
     }
 
