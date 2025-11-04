@@ -25,14 +25,25 @@ public class SummeryService {
 
     @Transactional
     public TotalSummeryDto totalSummery() {
-        Long totalFundingPrice = summeryRepository.getTotalFreeFundingPrice() + summeryRepository.getTotalOptionFundingPrice();
-        Long totalFundingCount = summeryRepository.getFreeFundingCount() + summeryRepository.getTotalOptionFundingCount();
+        Long totalFreeFundingPrice = summeryRepository.getTotalFreeFundingPrice();
+        Long totalOptionFundingPrice = summeryRepository.getTotalOptionFundingPrice();
+        Long freeFundingCount = summeryRepository.getFreeFundingCount();
+        Long totalOptionFundingCount = summeryRepository.getTotalOptionFundingCount();
         Long totalSuccessProjectCount = summeryRepository.getProjectCount(List.of(ProjectStatus.SUCCESS));
         Long totalProgressProjectCount = summeryRepository.getProjectCount(List.of(ProjectStatus.PROGRESS));
         Long totalSupporterCount = summeryRepository.getSupporterCount();
         Long totalCreatorCount = summeryRepository.getCreatorCount();
 
-        return new TotalSummeryDto(totalFundingPrice, totalFundingCount, totalSuccessProjectCount, totalProgressProjectCount, totalSupporterCount, totalCreatorCount);
+        return new TotalSummeryDto(
+                totalFreeFundingPrice,
+                totalOptionFundingPrice,
+                freeFundingCount,
+                totalOptionFundingCount,
+                totalSuccessProjectCount,
+                totalProgressProjectCount,
+                totalSupporterCount,
+                totalCreatorCount
+        );
     }
 
     @Transactional
