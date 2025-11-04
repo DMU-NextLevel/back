@@ -1,5 +1,5 @@
 # Step 1: OpenJDK 17 기반 이미지로 시작
-FROM openjdk:21-jdk-slim as build
+FROM eclipse-temurin:21-jdk-jammy as build
 
 # Step 2: Spring Boot 애플리케이션을 위한 작업 디렉토리 설정
 WORKDIR /app
