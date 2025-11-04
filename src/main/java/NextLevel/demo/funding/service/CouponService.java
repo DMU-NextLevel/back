@@ -23,7 +23,7 @@ public class CouponService {
 
     @Transactional
     public void addCoupon(RequestAddCouponDto dto) {
-        UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
+        UserEntity user = userValidateService.findUserWithUserId(dto.getUserId());
         couponRepository.save(dto.toEntity(user));
     }
 

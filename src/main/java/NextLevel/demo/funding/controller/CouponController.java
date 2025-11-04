@@ -21,14 +21,6 @@ public class CouponController {
 
     private final CouponService couponService;
 
-    @PostMapping("/admin/coupon/add")
-    public ResponseEntity addCoupon(@RequestBody @Valid RequestAddCouponDto dto) {
-        if(dto.getUserId()==null)
-            dto.setUserId(JWTUtil.getUserIdFromSecurityContext());
-        couponService.addCoupon(dto);
-        return ResponseEntity.ok().body(new SuccessResponse("success", null));
-    }
-
     @GetMapping("/social/coupon")
     public ResponseEntity getCoupon() {
         List<ResponseCouponDto> coupons =

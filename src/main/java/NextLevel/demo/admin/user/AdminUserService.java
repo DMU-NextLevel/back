@@ -25,8 +25,8 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final UserDeleteService userDeleteService;
 
-    public List<ResponseUserInfoDetailDto> getUserList(Pageable pageable) {
-        return userRepository.findAll(pageable).stream().map(ResponseUserInfoDetailDto::of).toList();
+    public List<ResponseFullUserInfoDto> getUserList(Pageable pageable) {
+        return userRepository.findAll(pageable).stream().map(ResponseFullUserInfoDto::of).toList();
     }
 
     public ResponseUserInfoDetailDto getUserInfo(Long userId) {
