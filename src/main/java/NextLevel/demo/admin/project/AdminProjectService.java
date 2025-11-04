@@ -1,5 +1,6 @@
 package NextLevel.demo.admin.project;
 
+import NextLevel.demo.admin.AdminRepository;
 import NextLevel.demo.funding.repository.FundingDslRepository;
 import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.dto.response.ProjectListWithFundingDto;
@@ -24,6 +25,7 @@ public class AdminProjectService {
     private final ProjectStatusService projectStatusService;
     private final SelectProjectListDslRepository selectProjectListDslRepository;
     private final FundingDslRepository fundingDslRepository;
+    private final AdminRepository adminRepository;
 
     @Transactional
     public ProjectListWithFundingDto getAllProjectListWithFundingData(Long page, Long pageCount) {
@@ -43,12 +45,15 @@ public class AdminProjectService {
         projectStatusService.updateProjectStatus(projectId, status, "by admin");
     }
 
-    public void updateProject() {
-
-    }
-
     public void removeProject(Long projectId, Long userId) {
         projectDeleteService.deleteProject(projectId, userId,null);
+    }
+
+    public List<ResponseFundingDataDto> selectAllFunding(Long page, Long pageCount) {
+        Long limit = (page + 1) * pageCount - 1;
+        Long offset = page * pageCount;
+        List<FundingDataDao> fundingDaoList = adminRepository.selectAllFunding(limit, offset);
+        return fundingDaoList.stream().map(ResponseFundingDataDto::of).toList();
     }
 
 }

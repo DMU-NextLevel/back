@@ -66,4 +66,16 @@ public class AdminProjectController {
         projectDeleteService.deleteProject(projectId, JWTUtil.getUserIdFromSecurityContext(), null);
         return ResponseEntity.ok().body(new SuccessResponse("success", null));
     }
+
+    @GetMapping("/funding")
+    public ResponseEntity selectAllFunding(
+            @RequestParam(value = "page", required = false) Long page,
+            @RequestParam(value = "pageCount", required = false) Long pageCount
+    ) {
+        if(page == null)
+            page = 0L;
+        if(pageCount == null)
+            pageCount = 10L;
+        return ResponseEntity.ok().body(new SuccessResponse("success", adminProjectService.selectAllFunding(page, pageCount)));
+    }
 }
