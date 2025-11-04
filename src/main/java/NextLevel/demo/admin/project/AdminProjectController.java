@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,18 @@ public class AdminProjectController {
     private final AdminProjectService adminProjectService;
     private final MypageProjectSelectService mypageProjectListService;
     private final UserValidateService userValidateService;
+
+    @GetMapping
+    public ResponseEntity getAllProjectListWithFundingData(
+            @RequestParam(value = "page", required = false) Long page,
+            @RequestParam(value = "pageCount", required = false) Long pageCount
+    ) {
+        if(page == null)
+            page = 0L;
+        if(pageCount == null)
+            pageCount = 10L;
+        return ResponseEntity.ok().body(new SuccessResponse("success", adminProjectService.getAllProjectListWithFundingData(page, pageCount)));
+    }
 
     @PostMapping
     public ResponseEntity<?> mypageProjectListSupporter(@RequestBody @Valid RequestMyPageProjectListDto dto) {

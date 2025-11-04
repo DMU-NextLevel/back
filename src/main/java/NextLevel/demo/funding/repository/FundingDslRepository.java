@@ -40,6 +40,7 @@ public class FundingDslRepository {
                 .fetchOne();
     }
 
+    // user id 가 있으면 해당 user 의 funding 정보만 , 없으면 모든 user 의 funding 정보 반환
     public void addFundingData(List<ProjectEntity> projectList, Long userId) {
         QProjectEntity project = new QProjectEntity("project");
         QOptionEntity option = new QOptionEntity("option");
