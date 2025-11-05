@@ -75,7 +75,7 @@ public class SummeryService {
 
         Long totalFundingPrice = (totalFreePrice != null ? totalFreePrice : 0L) + (totalOptionPrice != null ? totalOptionPrice : 0L);
 
-        return new ProjectSummeryDto(start.getMonthValue(), totalUserCount, totalFundingPrice);
+        return new ProjectSummeryDto(start, totalUserCount, totalFundingPrice);
     }
 
     @Transactional
