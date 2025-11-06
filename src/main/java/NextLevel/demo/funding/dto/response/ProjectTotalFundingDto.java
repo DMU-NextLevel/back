@@ -30,6 +30,7 @@ public class ProjectTotalFundingDto {
             count += listDto.getCount();
             price += listDto.getPrice();
         }
+        dto.optionFunding = optionFundingList;
 
         List<FreeFundingDto> freeFundingDtoList = new ArrayList<>();
         for(FreeFundingEntity freeFunding : freeFundingList){
@@ -38,6 +39,7 @@ public class ProjectTotalFundingDto {
             count++;
             price += freeFundingDto.getPrice();
         }
+        dto.freeFunding = freeFundingDtoList;
 
         dto.total = new ProjectFundingDto(count, price);
 

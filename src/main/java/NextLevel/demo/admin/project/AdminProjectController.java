@@ -67,6 +67,12 @@ public class AdminProjectController {
         return ResponseEntity.ok().body(new SuccessResponse("success", null));
     }
 
+    @GetMapping("/{projectId}")
+    public ResponseEntity getProjectFundingData(@PathVariable("projectId") Long projectId) {
+        return ResponseEntity.ok().body(new SuccessResponse("success", adminProjectService.getProjectFunding(projectId)));
+    }
+
+
     @GetMapping("/funding")
     public ResponseEntity selectAllFunding(
             @RequestParam(value = "page", required = false) Long page,

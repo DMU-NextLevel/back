@@ -1,7 +1,11 @@
 package NextLevel.demo.admin.project;
 
 import NextLevel.demo.admin.AdminRepository;
+import NextLevel.demo.funding.dto.response.FreeFundingDto;
+import NextLevel.demo.funding.dto.response.ProjectTotalFundingDto;
+import NextLevel.demo.funding.entity.FreeFundingEntity;
 import NextLevel.demo.funding.repository.FundingDslRepository;
+import NextLevel.demo.option.OptionEntity;
 import NextLevel.demo.project.ProjectStatus;
 import NextLevel.demo.project.project.dto.response.ProjectListWithFundingDto;
 import NextLevel.demo.project.project.dto.response.ResponseProjectListDetailDto;
@@ -26,6 +30,7 @@ public class AdminProjectService {
     private final SelectProjectListDslRepository selectProjectListDslRepository;
     private final FundingDslRepository fundingDslRepository;
     private final AdminRepository adminRepository;
+    private final ProjectValidateService projectValidateService;
 
     @Transactional
     public ProjectListWithFundingDto getAllProjectListWithFundingData(Long page, Long pageCount) {
@@ -54,6 +59,18 @@ public class AdminProjectService {
         Long offset = page * pageCount;
         List<FundingDataDao> fundingDaoList = adminRepository.selectAllFunding(limit, offset);
         return fundingDaoList.stream().map(ResponseFundingDataDto::of).toList();
+    }
+
+    @Transactional
+    public ProjectTotalFundingDto getProjectFunding(Long projectId) {
+        ProjectEntity project = projectValidateService.getProjectEntity(projectId);
+
+        List<OptionEntity> optionList = project.getOptions().stream().toList();
+        for(OptionEntity optionEntity : optionList)
+            optionEntity.getFundings();
+        List<FreeFundingEntity> freeFundingList = project.getFreeFundings().stream().toList();
+
+        return ProjectTotalFundingDto.of(optionList, freeFundingList);
     }
 
 }
