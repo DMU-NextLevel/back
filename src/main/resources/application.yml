@@ -156,18 +156,19 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   config:
+    import: optional:file:.env[.properties]
     activate:
       on-profile: query-test
   jpa:
     hibernate:
-      ddl-auto: update # 무조건 유지
+      ddl-auto: update
 #      format_sql: true
 #      show_sql: true
     properties:
       hibernate:
         cache.use_second_level_cache: false
         cache.use_query_cache: false
-#        show_sql: true
+        show_sql: false
 #        format_sql: true
 #    show-sql: true
 #

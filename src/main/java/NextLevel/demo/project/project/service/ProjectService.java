@@ -54,7 +54,7 @@ public class ProjectService {
     // 추가
     @ImgTransaction
     @Transactional
-    public void save(CreateProjectDto dto, ImgPath imgPath) {
+    public ProjectEntity save(CreateProjectDto dto, ImgPath imgPath) {
         // user 처리
         UserEntity user = userValidateService.getUserInfoWithAccessToken(dto.getUserId());
         validateUser(user);
@@ -67,6 +67,8 @@ public class ProjectService {
 
         projectStoryService.saveNewProjectStory(newProject, dto.getImgs(), imgPath);
         tagService.saveNewTags(newProject, dto.getTags());
+
+        return newProject;
     }
     private void validateUser(UserEntity user) {
         // user 당 한달에 생성 가능한 펀딩 갯수 제한?
