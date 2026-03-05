@@ -25,12 +25,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest
 @ActiveProfiles("query-test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ExtendWith(MockitoExtension.class)
 public class MyPage {
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @PersistenceContext
     EntityManager em;
@@ -46,13 +50,17 @@ public class MyPage {
     Long totalTime = 0L;
 
     @Test
-    // 10/03 :: 867ms (type : project, 100개 평균)
+    // 10/03 :: 946ms (type : project, 100개 평균)
+    // 2026 03/05 (+funding data) :: 1118ms (type : funding(내가 펀딩한), 100개 평균, project 1000개 , funding 4만개, user 100개, (tag, img N+1 query 확인됨)
     public void select100() {
         userIdList = userRepository.findAll().stream().map(UserEntity::getId).toList();
         selectOne();
         totalTime = 0L;
-        for(int i = 0; i < 100; i++)
-            selectOne();
+        for(int i = 0; i < 100; i++) {
+            transactionTemplate.executeWithoutResult(status -> {
+                selectOne();
+            });
+        }
         System.out.println("조회 종료 total time " + totalTime);
         resultList.forEach(System.out::println);
     }
@@ -67,8 +75,6 @@ public class MyPage {
 
         resultList.add(new Result(time, result.getTotalCount(), result.getProjects().size(), result));
         totalTime += time;
-
-        em.clear();
     }
 
     private RequestMyPageProjectListDto randomDto(List<Long> userIdList) {
@@ -76,7 +82,7 @@ public class MyPage {
         RequestMyPageProjectListDto dto = new RequestMyPageProjectListDto();
         dto.setUserId(userIdList.get(random % userIdList.size()));
 
-        dto.setType(MyPageProjectListType.FUNDING);
+        dto.setType(MyPageProjectListType.PROJECT);
 //        switch(random % 3) {
 //            case 0:
 //                dto.setType(MyPageProjectListType.PROJECT); break;

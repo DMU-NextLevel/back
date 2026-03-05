@@ -1,16 +1,32 @@
 package NextLevel.demo.query.make;
 
+import NextLevel.demo.funding.entity.FreeFundingEntity;
+import NextLevel.demo.funding.entity.OptionFundingEntity;
+import NextLevel.demo.funding.repository.FreeFundingRepository;
+import NextLevel.demo.funding.repository.OptionFundingRepository;
 import NextLevel.demo.img.service.ImgServiceImpl;
+import NextLevel.demo.option.OptionEntity;
+import NextLevel.demo.option.OptionRepository;
 import NextLevel.demo.project.project.dto.request.CreateProjectDto;
+import NextLevel.demo.project.project.entity.ProjectEntity;
+import NextLevel.demo.project.project.repository.ProjectRepository;
 import NextLevel.demo.project.project.service.ProjectService;
 import NextLevel.demo.user.dto.RequestUserCreateDto;
+import NextLevel.demo.user.entity.UserDetailEntity;
+import NextLevel.demo.user.entity.UserEntity;
 import NextLevel.demo.user.repository.UserDetailRepository;
 import NextLevel.demo.user.repository.UserRepository;
 import NextLevel.demo.user.service.EmailService;
 import NextLevel.demo.user.service.LoginService;
 import NextLevel.demo.user.service.UserValidateService;
 import NextLevel.demo.util.StringUtil;
+import java.util.stream.LongStream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -24,7 +40,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
@@ -38,6 +56,8 @@ import java.util.List;
 @ActiveProfiles("query-test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ExtendWith(MockitoExtension.class)
+@Disabled
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MakeTestQuery {
 
     private static final int userCount = 100;
@@ -45,6 +65,21 @@ public class MakeTestQuery {
 
     private LoginService loginService;
     private ProjectService projectService;
+
+    private final TransactionTemplate transactionTemplate;
+
+    private MockedStatic<StringUtil> stringUtilStatic;
+    private MockedStatic<Files> filesStatic;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private OptionRepository optionRepository;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private FreeFundingRepository freeFundingRepository;
+    @Autowired
+    private OptionFundingRepository optionFundingRepository;
 
     public MakeTestQuery(
             @Autowired UserRepository userRepository,
@@ -54,7 +89,10 @@ public class MakeTestQuery {
             @Autowired ImgServiceImpl imgService,
             @Mock EmailService emailService,
 
-            @Autowired ProjectService projectService
+            @Autowired ProjectService projectService,
+
+            @Autowired
+            PlatformTransactionManager txManager
     ) {
         loginService = new LoginService(
                 userRepository,
@@ -65,24 +103,46 @@ public class MakeTestQuery {
                 userValidateService
         );
         this.projectService = projectService;
+
+        this.transactionTemplate = new TransactionTemplate(txManager);
+
         mockInit();
     }
 
     private void mockInit() {
-        // String Util.getFormattedNumber -> just return number
-        MockedStatic<StringUtil> stringUtilStatic = Mockito.mockStatic(StringUtil.class);
-        stringUtilStatic.when(() -> StringUtil.getFormattedNumber(Mockito.anyString(), Mockito.anyString())).thenAnswer(invocation -> invocation.getArgument(0));
-        MockedStatic<java.nio.file.Files> fileStatic = Mockito.mockStatic(Files.class);
-        fileStatic.when(()->Files.write(Mockito.any(), Mockito.any(byte[].class))).thenReturn(Paths.get("uri"));
-        fileStatic.when(()->Files.delete(Mockito.any(Path.class))).thenAnswer((Answer<Void>) invocation -> null);
+        stringUtilStatic = Mockito.mockStatic(StringUtil.class);
+        stringUtilStatic
+                .when(() -> StringUtil.getFormattedNumber(Mockito.anyString(), Mockito.anyString()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        filesStatic = Mockito.mockStatic(Files.class);
+        filesStatic
+                .when(() -> Files.write(Mockito.any(), Mockito.any(byte[].class)))
+                .thenReturn(Paths.get("uri"));
+
+        filesStatic
+                .when(() -> Files.delete(Mockito.any(Path.class)))
+                .thenAnswer(invocation -> null);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (stringUtilStatic != null) stringUtilStatic.close();
+        if (filesStatic != null) filesStatic.close();
     }
 
     @Test
-    @Transactional
     @Rollback(false)
+    @Order(1)
     public void makeUser100() {
         for(int i = 0; i < userCount; i++) {
-            loginService.register(randomUserDto(i), new ArrayList<>());
+            int userId = i;
+            transactionTemplate.executeWithoutResult(status -> {
+                UserDetailEntity detail = loginService.register(randomUserDto(userId), new ArrayList<>());
+                UserEntity user = detail.getUser();
+                user.updatePoint(100000);
+                userRepository.save(user);
+            });
         }
     }
 
@@ -91,13 +151,10 @@ public class MakeTestQuery {
                 .builder()
                 .name("user" + count)
                 .nickName("nickname" + count)
-
                 .email("email"+count)
                 .address("address" + count)
-
                 .number("number" + count)
                 .areaNumber("areaNumber" + count)
-
                 .password("passwrod" + count)
                 .build();
         dto.setKey("key");
@@ -106,11 +163,17 @@ public class MakeTestQuery {
     }
 
     @Test
-    @Transactional
     @Rollback(false)
+    @Order(2)
     public void makeProject1000() {
         for(int i = 0; i < projectCount; i++) {
-            projectService.save(randomProjectDto(i, userCount) , new ArrayList<>());
+            int projectId = i;
+            transactionTemplate.executeWithoutResult(status -> {
+                CreateProjectDto dto = randomProjectDto(projectId, userCount);
+                ProjectEntity newProject = projectService.save(dto, new ArrayList<>());
+
+                makeOptions(newProject, List.of(100,200,300));
+            });
         }
     }
 
@@ -132,8 +195,55 @@ public class MakeTestQuery {
                 Long.valueOf(count % 4 + 2),
                 Long.valueOf(count % 4 + 3)
         }));
-        System.out.println(dto.toString());
         return dto;
+    }
+
+    private void makeOptions(ProjectEntity projectEntity, List<Integer> priceList) {
+        List<OptionEntity> optionList = priceList.stream().map(price ->
+                OptionEntity.builder()
+                        .project(projectEntity)
+                        .price(price)
+                        .description(price + " Option")
+                        .build()
+        ).toList();
+        optionRepository.saveAll(optionList);
+    }
+
+    @Test
+    @Rollback(false)
+    @Order(3)
+    public void makeFunding() {
+        List<ProjectEntity> allProjects = projectRepository.findAll();
+        for(ProjectEntity project : allProjects) {
+            transactionTemplate.executeWithoutResult(status -> {
+                List<Long> funderIdList = LongStream.range(project.getUser().getId(), project.getUser().getId()+20).boxed().toList();
+                List<UserEntity> funderList = userRepository.findAllById(funderIdList);
+
+                List<OptionEntity> optionList = optionRepository.findByProjectId(project.getId());
+
+                makeFunding(project, optionList, funderList);
+            });
+        }
+    }
+
+    private void makeFunding(ProjectEntity projectEntity, List<OptionEntity> optionList, List<UserEntity> funderList) {
+        List<FreeFundingEntity> freeFundingEntityList = funderList.stream().map(funder->
+                FreeFundingEntity.builder()
+                        .price(500L)
+                        .project(projectEntity)
+                        .user(funder)
+                        .build()
+        ).toList();
+        freeFundingRepository.saveAll(freeFundingEntityList);
+
+        List<OptionFundingEntity> optionFundingList = funderList.stream().map(funder ->
+                OptionFundingEntity.builder()
+                        .user(funder)
+                        .count(1)
+                        .option(optionList.get(funder.getId().intValue() % 3))
+                        .build()
+        ).toList();
+        optionFundingRepository.saveAll(optionFundingList);
     }
 
 }
