@@ -13,6 +13,8 @@ services:
     command: ["java", "-jar", "/app/app.jar", "--spring.profiles.active=prod"]
     networks:
       - mysql-network
+    mem_limit: 500m
+    cpus: 0.4
 
   nginx:
     image: lkh8033/nextlevel-nginx:latest
@@ -26,6 +28,8 @@ services:
       - springboot
     networks:
       - mysql-network
+    mem_limit: 128m
+    cpus: 0.2
 
 networks:
   mysql-network:
