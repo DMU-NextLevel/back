@@ -1,0 +1,44 @@
+HttpSecurity에 context를 주면서 context에 List로 uri별 권한 설정을 쌓게 됨
+  context : AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
+  uri별 권한 설정 : RequestMatcherEntry {RequestMatcher matcher, AuthorizationManager<RequestAuthorizationContext> manager}
+
+RequestMatcher : url 기반의 정보
+AuthorizationManger<RequestAuthorizationContext> : authentication을 가지고 AuthorizationDecision을 반환함
+
+HttpSecurity.build() 실행시
+    AuthorizeHttpRequestsConfigurer.configure() 실행
+    저장된 모든 uri별 권한 설정을 AuthorizationFilter 필터 한개로 변환하고 security filter chain에 등록함
+        AuthorizationFilter를 만들 때 AuthorizationManager를 생성자로 넘겨줌
+          List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>>를 AuthorizationManager<HttpServletRequest> 으로 변환함 (by RequestMatcherDelegatingAuthorizationManager.class 생성자) (filter에서는 HttpServletRequest만 사용하기 때문 by gpt)
+    AuthorizationManager<HttpServletRequest>.authorize 함수를 톧해 권한을 설정함
+
+AuthorizationFilter 에서는 AuthorizationManager<HttpServletRequest>를 가지고 모든 요청을 url과 권한을 가지고 판단함
+    AuthorizationManager.authorize 함수를 실행시킴
+
+1. HttpSecurity에서 authorizeHttpRequests() 함수 실행
+    AuthorizeHttpRequestsConfigure.class 반환
+        AuthorizeHttpRequestsConfigure내부 class AuthorizationManagerRequestMatcherRegistry, AuthorizedUrl를 반복하며url 입력, manager 입력을 받는다
+        입력 받은 RequestMatcher와 AuthorizationManager를 RequestMatherEntry로 두고 RequestMatcherDelegatingAuthorizationManager.Builder에 쌓는다 (builder에서는 List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>>으로 저장함)
+2. HttpSecurity.build() 함수 실행시
+    AuthorizeHttpRequestConfigure.configure()함수 실행됨
+        RequestMatcherDelegatingAuthorizationManager.Builder.build()를 통해 AuthorizationManager<HttpServletRequest> 생성
+            (형변환은 하지 않음 RequestMatcherDelegatingAuthorizationManager<HttpServletRequest>의 내부 변수 mappings가 List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>> 형태임
+        AuthorizationManager<HttpServletRequest> authorizationManager 가지는 Authorization 생성 / filter chain 등록
+3. 매 요청에 AuthorizationFilter 작동
+    매 요청 마다 List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>>를 순회함
+        입력 받은 RequestMatherEntry.RequestMatcher를 통해 url 검증
+        RequestMatherEntry.AuthorizationManager를 통해 authentic 검증 (AuthorizationManager.authorize() 함수 호출)
+4. 매 요청 마다 발생하는 uri별 Exception을 다르게 처리하기 위해 authorize함수를 override하여 throw CustomException을 처리 예정
+    문제 발생 check함수에서 throw를 맘대로 던져도 되는가?
+        다행히 AuthorizationFilter는 boolean값인 AuthorizationResult을 반환하는 check함수에서 Exception을 반환하는 verify로 변환을 준비중이다
+        아직 변환되지는 않았지만 문제되 점은 크게 많지 않아 보임
+            1. this.eventPublisher.publishAuthorizationEvent(this::getAuthentication, request, result); 문장 실행 안됨
+                AuthenticFilter내부 변수 AuthenticationEventPublisher eventPublisher에 저장중이다
+                publisher는 filter를 생성하는 AuthorizeHttpRequestsConfigure에서 부터 내려왔으며 ApplicationContext에 저장된 객체이다
+                실패 횟수, 로그 등에 사용 되는 event임 (건너 뛰는 것은 좋지 않지만 다른 방법이 없으면 무시하겠음)
+    해결 방법 탐색
+        1. event 무시하고 그냥 throw 던지기
+        2. 깔끔하게 AuthorizationFilter를 직접 구현하여 실패시도 알맞은 publishAuthorizationEvent를 발행하게 한다
+        AuthorizationFilter를 생성하는 AuthorizeHttpRequestsConfigure을 상속해야 하는데 하필 AuthorizeHttpRequestsConfigure은 final class이다 (불가능)
+        3. 매우 더럽게 HttpSecurity부터 override하고, AuthorizeHttpRequestsConfigure의 모든 interface를 구현한다 (사실 복 붙이라 직접 구현은 아니겠지만) (싫음)
+    깔금하게 log event따위 무시하고 throw 던지기 (언젠가 security의 버전이 올라가며 AuthorizationManager.check가 완전히 사라진다면 무시된 event에 대한 코드도 수정이 되어있을 것으로 예상)
