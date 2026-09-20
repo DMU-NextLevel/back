@@ -9,37 +9,39 @@ import NextLevel.demo.oauth.NullAuthorizedClientRepository;
 import NextLevel.demo.oauth.OAuthFailureHandler;
 import NextLevel.demo.oauth.OAuthSuccessHandler;
 import NextLevel.demo.oauth.SocialLoginService;
+import NextLevel.demo.role.UserRole;
 import NextLevel.demo.user.repository.UserHistoryRepository;
 import NextLevel.demo.user.repository.UserRepository;
 import NextLevel.demo.user.service.LoginService;
 import NextLevel.demo.util.jwt.JWTUtil;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Supplier;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authorization.AuthorityAuthorizationManager;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcherEntry;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
@@ -90,64 +92,61 @@ public class SecurityConfig {
                 .requestMatchers("/login/**").permitAll()
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/payment/**").permitAll()
-                .requestMatchers("/api1/**").hasRole("USER")
                 .requestMatchers("/social/**").hasRole("SOCIAL")
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                    .requestMatchers("/admin/**").access(new AuthorizationManager<RequestAuthorizationContext>() {
-                        @Override
-                        public AuthorizationDecision check(
-                                Supplier<Authentication> authentication,
-                                RequestAuthorizationContext object
-                        ) {
-                            return null;
-                        }
-                    })
+                .requestMatchers("/api1/**").access(new AuthorizationManager<RequestAuthorizationContext>() {
+                    @Override
+                    public AuthorizationResult authorize(
+                            Supplier<Authentication> authentication,
+                            RequestAuthorizationContext object
+                    ) {
+                        Authentication auth = authentication.get();
+                        if (auth == null || auth instanceof AnonymousAuthenticationToken)
+                            return new ErrorCodeAuthorizationResult(ErrorCode.NO_AUTHENTICATED);
+
+                        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+
+                        if (authorities.containsAll(UserRole.USER.getAuthorities()))
+                            return new AuthorizationDecision(true);
+
+                        if (authorities.containsAll(UserRole.SOCIAL.getAuthorities()))
+                            return new ErrorCodeAuthorizationResult(ErrorCode.NEED_ADDITIONAL_DATA);
+
+                        throw new CustomException(ErrorCode.SIBAL_WHAT_IS_IT, "not social, admin, user, anonymous");
+                    }
+                    @Override
+                    public AuthorizationDecision check(
+                            Supplier<Authentication> authentication,
+                            RequestAuthorizationContext object
+                    ) {
+                        throw new UnsupportedOperationException("use authorize()");
+                    }
+                })
+                .requestMatchers("/admin/**").access(new AuthorizationManager<RequestAuthorizationContext>() {
+                    @Override
+                    public AuthorizationResult authorize(
+                            Supplier<Authentication> authentication,
+                            RequestAuthorizationContext object
+                    ) {
+                        Authentication auth = authentication.get();
+                        if (auth == null || auth instanceof AnonymousAuthenticationToken)
+                            return new ErrorCodeAuthorizationResult(ErrorCode.NO_AUTHENTICATED);
+
+                        if (auth.getAuthorities().containsAll(UserRole.ADMIN.getAuthorities()))
+                            return new AuthorizationDecision(true);
+
+                        return new ErrorCodeAuthorizationResult(ErrorCode.NOT_ADMIN);
+                    }
+
+                    @Override
+                    public AuthorizationDecision check(
+                            Supplier<Authentication> authentication,
+                            RequestAuthorizationContext object
+                    ) {
+                        throw new UnsupportedOperationException("use authorize()");
+                    }
+                })
                 .anyRequest().denyAll() // 그 외 요청은 모두 거절
             )
-                .authorizeHttpRequests(
-                        new Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>() {
-                            @Override
-                            public void customize(
-                                    AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizationManagerRequestMatcherRegistry) {
-                                authorizationManagerRequestMatcherRegistry.requestMatchers()
-                            }
-                        })
-                    .authorizeHttpRequests(auth->
-                            auth.requestMatchers("/api1/**").access(new AuthorizationManager<RequestAuthorizationContext>() {
-                                @Override
-                                public void verify(Supplier<Authentication> authentication,
-                                                   RequestAuthorizationContext object) {
-                                    AuthorizationManager.super.verify(authentication, object);
-                                }
-                                @Override
-                                public AuthorizationDecision check(Supplier<Authentication> authentication,
-                                                                   RequestAuthorizationContext object) {
-                                    withRoleHierarchy(AuthorityAuthorizationManager
-                                            .hasAnyRole(AuthorizeHttpRequestsConfigurer.this.rolePrefix, new String[] { role }))
-                                }
-                            })
-                    )
-                .authorizeHttpRequests(
-                        new Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>() {
-                            @Override
-                            public void customize(
-                                    AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizationManagerRequestMatcherRegistry) {
-                                authorizationManagerRequestMatcherRegistry.requestMatchers(new RequestMatcher() {
-                                    @Override
-                                    public boolean matches(HttpServletRequest request) {
-                                        return false;
-                                    }
-                                }).access(new AuthorizationManager<RequestAuthorizationContext>() {
-
-                                    @Override
-                                    public AuthorizationDecision check(Supplier<Authentication> authentication,
-                                                                       RequestAuthorizationContext object) {
-                                        return null;
-                                    }
-                                });
-                            }
-                        }
-                )
 
             .oauth2Login(oauth2 -> oauth2
                 .authorizedClientRepository(new NullAuthorizedClientRepository())
@@ -164,18 +163,49 @@ public class SecurityConfig {
             .exceptionHandling((exceptions) -> exceptions
                 .authenticationEntryPoint((request, response, authenticationException)-> {
                     authenticationException.printStackTrace();
-                    handlerExceptionResolver.resolveException(request, response, null,
-                        new CustomException(ErrorCode.NO_AUTHENTICATED));
+                    if(authenticationException instanceof InsufficientAuthenticationException)
+                        // denyAll()
+                        handlerExceptionResolver.resolveException(request, response, null, new CustomException(ErrorCode.NO_AUTHENTICATED));
+                    else if(authenticationException instanceof CustomException)
+                        handlerExceptionResolver.resolveException(request, response, null, (CustomException)authenticationException);
+                    else
+                        handlerExceptionResolver.resolveException(request, response, null, new CustomException(ErrorCode.SIBAL_WHAT_IS_IT, authenticationException.getMessage()));
                 })
                 .accessDeniedHandler((request, response, accessDeniedException)-> {
-                    accessDeniedException.printStackTrace();
-                    handlerExceptionResolver.resolveException(request, response, null, new CustomException(ErrorCode.NEED_ADDITIONAL_DATA));
+                    if(
+                        accessDeniedException instanceof AuthorizationDeniedException
+                        && ((AuthorizationDeniedException)accessDeniedException).getAuthorizationResult() instanceof ErrorCodeAuthorizationResult
+                    ) {
+                        ErrorCode errorCode = ((ErrorCodeAuthorizationResult) ((AuthorizationDeniedException)accessDeniedException).getAuthorizationResult()).getErrorCode();
+                        handlerExceptionResolver.resolveException(request, response, null, new CustomException(errorCode));
+                    } else
+                        handlerExceptionResolver.resolveException(request, response, null, new CustomException(ErrorCode.SIBAL_WHAT_IS_IT, accessDeniedException.getMessage()));
                 })
             )
 
             ;
 
-        return http.build();
+        SecurityFilterChain filterChain = http.build();
+        replaceAuthorizationManager(filterChain);
+
+        return filterChain;
+    }
+
+    private void replaceAuthorizationManager(SecurityFilterChain chain) throws Exception {
+        for (Filter filter : chain.getFilters()) {
+            if (!(filter instanceof AuthorizationFilter authorizationFilter))
+                continue;
+
+            AuthorizationManager<HttpServletRequest> origin = authorizationFilter.getAuthorizationManager();
+            Field mappingsField = origin.getClass().getDeclaredField("mappings");
+            mappingsField.setAccessible(true);
+            List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>> mappings =
+                (List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>>) mappingsField.get(origin);
+
+            Field managerField = AuthorizationFilter.class.getDeclaredField("authorizationManager");
+            managerField.setAccessible(true);
+            managerField.set(authorizationFilter, new DelegatingAuthorizationManager(mappings));
+        }
     }
 
     @Bean
